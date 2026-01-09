@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import StatusBar from './components/StatusBar';
 import BackgroundFX from './components/BackgroundFX';
 import DoneModal from './components/DoneModal';
+import InstallPrompt from './components/InstallPrompt';
 // TODO: Re-add Selah chat later
 // import AskAIButton from './components/AskAIButton';
 // import SelahPanel from './components/SelahPanel';
@@ -386,6 +387,9 @@ function App() {
           onViewProgress={handleViewProgress}
           onReturnFocus={handleCloseDoneModal}
         />
+        
+        {/* PWA Install Prompt */}
+        <InstallPrompt />
         
         {/* TODO: Re-add Selah chat later */}
         {/* <AskAIButton onAsk={handleAskSelah} position="bottom-right" /> */}
