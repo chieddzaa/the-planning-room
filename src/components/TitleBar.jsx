@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getProfilePicture, removeProfilePicture, saveProfilePicture, imageToDataURL, validateImageFile, compressImage } from '../utils/profilePicture';
 import { getEnabledThemes, getThemeConfig } from '../utils/themeConfig';
+import SyncStatus from './SyncStatus';
 
 export default function TitleBar({ username, themeTint, onThemeChange, theme, onThemeSwitch, dayNightMode = 'day', onToggleDayNight, onLogout, activeTab, onMenuClick, onDone, onDoneButtonRef }) {
   const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -387,6 +388,11 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
               </div>
             </>
           )}
+        </div>
+
+        {/* Sync Status - Minimal indicator */}
+        <div className="hidden sm:flex items-center">
+          <SyncStatus />
         </div>
 
         {/* Done Button - Desktop */}
