@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { buildKey } from '../utils/storageKeys';
-import { imageToDataURL, validateImageFile, saveProfilePicture } from '../utils/profilePicture';
+import { imageToDataURL, validateImageFile, saveProfilePicture, compressImage } from '../utils/profilePicture';
 import { getThemeConfig, THEMES } from '../utils/themeConfig';
 
 export default function Login({ onLogin }) {
@@ -44,8 +44,14 @@ export default function Login({ onLogin }) {
     setError('');
 
     try {
+      // Compress image if it's large (iPhone photos)
+      let processedFile = file;
+      if (file.size > 1024 * 1024) { // If larger than 1MB, compress it
+        processedFile = await compressImage(file, 800, 800, 0.85);
+      }
+      
       // Convert to base64
-      const dataURL = await imageToDataURL(file);
+      const dataURL = await imageToDataURL(processedFile);
       setPfpPreview(dataURL);
     } catch (error) {
       console.error('Error processing image:', error);
@@ -282,7 +288,7 @@ export default function Login({ onLogin }) {
                       {pfpPreview ? 'change' : 'upload'}
                     </label>
                     <p className="text-xs text-gray-400 mt-1.5 font-light">
-                      max 1MB
+                      max 10MB (auto-compressed)
                     </p>
                   </div>
                 </div>

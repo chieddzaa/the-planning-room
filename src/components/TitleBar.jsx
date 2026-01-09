@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getProfilePicture, removeProfilePicture, saveProfilePicture, imageToDataURL, validateImageFile } from '../utils/profilePicture';
+import { getProfilePicture, removeProfilePicture, saveProfilePicture, imageToDataURL, validateImageFile, compressImage } from '../utils/profilePicture';
 
 export default function TitleBar({ username, themeTint, onThemeChange, theme, onThemeSwitch, onLogout, activeTab, onMenuClick }) {
   const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -43,8 +43,14 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
     }
 
     try {
+      // Compress image if it's large (iPhone photos)
+      let processedFile = file;
+      if (file.size > 1024 * 1024) { // If larger than 1MB, compress it
+        processedFile = await compressImage(file, 800, 800, 0.85);
+      }
+      
       // Convert to base64
-      const dataURL = await imageToDataURL(file);
+      const dataURL = await imageToDataURL(processedFile);
       // Save PFP
       saveProfilePicture(username, dataURL);
       setPfp(dataURL);
