@@ -1,11 +1,12 @@
 /**
- * Configuration for background FX based on theme and page
- * @param {string} theme - Theme: "pink", "rose-quartz", "ai-lab", etc.
+ * Configuration for background FX based on theme, mode, and page
+ * @param {string} theme - Theme key: "pink", "rose-quartz", "ai-lab", "midnight-ai", "sage-reset", "warm-neutral", "lavender-tech" (same as rest of app)
+ * @param {"day" | "night"} dayNightMode - Current day/night mode
  * @param {string} page - Page: "yearly" | "monthly" | "weekly" | "daily"
  * @param {boolean} isLoginPage - Whether this is the login page (reduced effects)
  * @returns {Object} Configuration object with counts, sizes, speeds, etc.
  */
-export function getFXConfig(theme, page, isLoginPage = false) {
+export function getFXConfig(theme, dayNightMode = 'day', page, isLoginPage = false) {
   // Page density multipliers
   const pageMultipliers = {
     yearly: { count: 0.7, speed: 0.8, size: 1.0 }, // Calm, fewer, slower
@@ -24,10 +25,12 @@ export function getFXConfig(theme, page, isLoginPage = false) {
     size: pageConfig.size * loginMultiplier.size,
   };
 
-  // Base configuration per theme
+  // Base configuration per theme and mode
+  // Hearts ONLY show in Day Mode Pink + Day Mode Rose Quartz
+  // Night Mode Pink: Neon particles/glow instead
   const themeConfigs = {
-    pink: {
-      // Soft Pink theme: hearts + sparkles (improved visibility)
+    pink: dayNightMode === 'day' ? {
+      // Day Mode Pink: hearts + sparkles (improved visibility)
       heartCount: Math.round(10 * effectiveConfig.count), // Slightly fewer but larger
       sparkleCount: Math.round(6 * effectiveConfig.count),
       heartSizes: { 
@@ -47,9 +50,24 @@ export function getFXConfig(theme, page, isLoginPage = false) {
         max: 35 * effectiveConfig.speed,
       },
       heartGlow: true, // Enable soft pink glow
+    } : {
+      // Night Mode Pink: Neon particles/glow (NO hearts)
+      particleCount: Math.round(18 * effectiveConfig.count), // More particles for neon effect
+      lineCount: Math.round(8 * effectiveConfig.count),
+      glowCount: Math.round(6 * effectiveConfig.count), // More glows for neon effect
+      particleSizes: { min: 4, max: 10 },
+      lineLengths: { min: 25, max: 70 },
+      glowSizes: { min: 40, max: 100 },
+      particleColors: ['rgba(244, 114, 182, 0.3)', 'rgba(236, 72, 153, 0.35)', 'rgba(251, 113, 133, 0.28)'],
+      lineColors: ['rgba(244, 114, 182, 0.25)', 'rgba(236, 72, 153, 0.3)'],
+      glowColors: ['rgba(244, 114, 182, 0.2)', 'rgba(236, 72, 153, 0.25)', 'rgba(6, 182, 212, 0.15)'], // Hot pink + cyan accents
+      animationDuration: {
+        min: 12 * effectiveConfig.speed, // Faster for dynamic neon effect
+        max: 20 * effectiveConfig.speed,
+      },
     },
-    'rose-quartz': {
-      // Rose Quartz theme: hearts + sparkles (same as pink but with rose colors)
+    'rose-quartz': dayNightMode === 'day' ? {
+      // Day Mode Rose Quartz: hearts + sparkles (same as pink but with rose colors)
       heartCount: Math.round(10 * effectiveConfig.count),
       sparkleCount: Math.round(6 * effectiveConfig.count),
       heartSizes: { 
@@ -69,6 +87,21 @@ export function getFXConfig(theme, page, isLoginPage = false) {
         max: 35 * effectiveConfig.speed,
       },
       heartGlow: true,
+    } : {
+      // Night Mode Rose Quartz: Neon particles/glow (NO hearts) - same as pink night mode
+      particleCount: Math.round(18 * effectiveConfig.count),
+      lineCount: Math.round(8 * effectiveConfig.count),
+      glowCount: Math.round(6 * effectiveConfig.count),
+      particleSizes: { min: 4, max: 10 },
+      lineLengths: { min: 25, max: 70 },
+      glowSizes: { min: 40, max: 100 },
+      particleColors: ['rgba(244, 114, 182, 0.3)', 'rgba(236, 72, 153, 0.35)', 'rgba(251, 113, 133, 0.28)'],
+      lineColors: ['rgba(244, 114, 182, 0.25)', 'rgba(236, 72, 153, 0.3)'],
+      glowColors: ['rgba(244, 114, 182, 0.2)', 'rgba(236, 72, 153, 0.25)', 'rgba(6, 182, 212, 0.15)'],
+      animationDuration: {
+        min: 12 * effectiveConfig.speed,
+        max: 20 * effectiveConfig.speed,
+      },
     },
     'ai-lab': {
       // AI Lab theme: electric particles
@@ -149,6 +182,22 @@ export function getFXConfig(theme, page, isLoginPage = false) {
     },
   };
 
-  return themeConfigs[theme] || themeConfigs['ai-lab'];
+  // Return config for theme, fallback to ai-lab
+  return themeConfigs[theme] || (themeConfigs['ai-lab'] || {
+    // Default fallback - minimal particles
+    particleCount: Math.round(12 * effectiveConfig.count),
+    lineCount: Math.round(4 * effectiveConfig.count),
+    glowCount: Math.round(3 * effectiveConfig.count),
+    particleSizes: { min: 3, max: 8 },
+    lineLengths: { min: 20, max: 60 },
+    glowSizes: { min: 30, max: 80 },
+    particleColors: ['rgba(8, 145, 178, 0.2)', 'rgba(6, 182, 212, 0.25)', 'rgba(14, 165, 233, 0.18)'],
+    lineColors: ['rgba(8, 145, 178, 0.15)', 'rgba(6, 182, 212, 0.2)'],
+    glowColors: ['rgba(8, 145, 178, 0.1)', 'rgba(6, 182, 212, 0.12)'],
+    animationDuration: {
+      min: 15 * effectiveConfig.speed,
+      max: 25 * effectiveConfig.speed,
+    },
+  });
 }
 

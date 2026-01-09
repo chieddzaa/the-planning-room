@@ -24,7 +24,7 @@ export default function AskAIButton({ onAsk, position = 'bottom-right' }) {
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`fixed ${positionClasses[position]} z-[9997] px-4 sm:px-4 py-3 sm:py-3 rounded-full text-xs sm:text-sm font-medium text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 touch-manipulation mb-16 sm:mb-6`}
+      className={`fixed ${positionClasses[position]} z-[99999] px-4 sm:px-4 py-3 sm:py-3 rounded-full text-xs sm:text-sm font-medium text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 touch-manipulation mb-16 sm:mb-6`}
       style={{
         background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
         boxShadow: isHovered 

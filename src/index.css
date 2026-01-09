@@ -8,35 +8,65 @@
   --rc-radius: var(--border-radius);
   --rc-glass: var(--glass-bg);
   --rc-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --rc-accent: var(--accent);
-  --rc-accent-2: var(--accent2);
+  --rc-accent: var(--primary);
+  --rc-accent-2: var(--primary-color-2);
   --rc-text: var(--text);
   --rc-muted: var(--muted);
   
   /* RGB values for rgba() usage */
   --rc-accent-rgb: 8, 145, 178; /* Default blue, overridden per theme */
   --rc-accent-2-rgb: 14, 116, 144;
+  
+  /* Day/Night Mode Tokens - Base tokens that adapt */
+  /* These are the global theme tokens used throughout the app */
+  --bg: var(--bg1);
+  --card: var(--card);
+  --text: var(--text);
+  --muted: var(--muted);
+  --border: var(--border);
+  --primary: var(--primary-color);
+  /* For backward compatibility, --accent maps to primary color */
+  --accent: var(--primary-color);
+  --accent2: var(--primary-color-2);
+  --glow: var(--glow-color);
+  
+  /* Reality Check specific tokens for consistent theming */
+  --rc-primary: var(--primary-color);
+  --rc-primary-2: var(--primary-color-2);
+  --rc-accent: var(--accent);
+  --rc-accent-2: var(--accent2);
+  --rc-border: var(--border);
+  --rc-focus: var(--primary-color);
+  --rc-glow: var(--glow-color);
 }
 
 /* Theme Variables - Flux Mode (Default) - Cool, Sharp, Tech Lab Vibe */
 :root,
 [data-theme="ai-lab"] {
-  /* Accent colors - cool blue/teal, electric, precise */
+  /* Day Mode (Default) */
+  /* Primary color - cool blue/teal, electric, precise */
+  --primary-color: #0891b2;
+  --primary-color-2: #0e7490;
+  /* Secondary accent - optional blue/purple */
+  --secondary-accent: #0891b2;
+  --secondary-accent-2: #0e7490;
+  /* Legacy accent vars for backward compatibility */
   --accent: #0891b2;
   --accent2: #0e7490;
-  --glow: rgba(8, 145, 178, 0.2);
-  --hover-glow: rgba(6, 182, 212, 0.3);
+  /* Glow effects - subtle in day mode */
+  --glow-color: rgba(8, 145, 178, 0.15);
+  --hover-glow: rgba(6, 182, 212, 0.25);
   
-  /* Background colors - cool grey tones, desk-like */
+  /* Background colors - light, cool grey tones */
   --bg1: #e8f4f8;
   --bg2: #f0f9ff;
   
-  /* Card colors */
+  /* Card colors - light and soft */
   --card: rgba(255, 255, 255, 0.65);
   --card-hover: rgba(255, 255, 255, 0.85);
-  --border: rgba(203, 213, 225, 0.6);
+  --border: rgba(203, 213, 225, 0.6); /* Soft borders */
   
-  /* Text colors */
+  /* Text colors - dark for readability */
   --text: #0f172a;
   --muted: #475569;
   
@@ -62,24 +92,77 @@
   --rc-accent-2-rgb: 14, 116, 144;
 }
 
+/* Night Mode - Neon Theme (Dark Background) */
+[data-day-night="night"] {
+  /* Background colors - near-black dark with subtle neon glow */
+  --bg1: #0a0a0f;
+  --bg2: #0f0f17;
+  
+  /* Card colors - dark with subtle transparency */
+  --card: rgba(20, 20, 30, 0.8);
+  --card-hover: rgba(25, 25, 35, 0.9);
+  /* Border color will be overridden by theme-specific night mode rules */
+  --border: rgba(59, 130, 246, 0.3); /* Default blue/cyan border - overridden per theme */
+  
+  /* Text colors - light for readability */
+  --text: #f1f5f9;
+  --muted: #cbd5e1;
+  
+  /* Glass effect - dark glass */
+  --glass-bg: rgba(20, 20, 30, 0.7);
+  
+  /* Reality Check Design Tokens - Night Mode */
+  --rc-glass: rgba(20, 20, 30, 0.7);
+  --rc-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --rc-text: #f1f5f9;
+  --rc-muted: #cbd5e1;
+}
+
+/* Night Mode - AI Lab Theme: Blue/cyan primary */
+[data-day-night="night"][data-theme="ai-lab"] {
+  /* Primary color becomes blue/cyan */
+  --primary-color: #06b6d4; /* Cyan for primary elements */
+  --primary-color-2: #0891b2;
+  --secondary-accent: #3b82f6; /* Blue accent */
+  --secondary-accent-2: #2563eb;
+  /* Legacy vars for backward compatibility */
+  --accent: #06b6d4;
+  --accent2: #0891b2;
+  /* Subtle neon glow - only on primary elements */
+  --glow-color: rgba(6, 182, 212, 0.35);
+  --hover-glow: rgba(96, 165, 250, 0.45);
+  --rc-accent: #06b6d4;
+  --rc-accent-2: #0891b2;
+  --rc-accent-rgb: 6, 182, 212;
+  --rc-accent-2-rgb: 8, 145, 178;
+}
+
 /* Soft Pink Theme - Soft, Rounded, Cozy Vibe */
 [data-theme="pink"] {
-  /* Accent colors - soft rosy pink, warm and romantic */
+  /* Day Mode - Pink/rose primary (softer pink) */
+  /* Primary color - soft rosy pink, warm and romantic */
+  --primary-color: #f472b6; /* Soft rose pink primary */
+  --primary-color-2: #ec4899;
+  /* Optional blue/purple accent */
+  --secondary-accent: #a78bfa; /* Optional purple accent */
+  --secondary-accent-2: #8b5cf6;
+  /* Legacy vars for backward compatibility */
   --accent: #f472b6;
   --accent2: #ec4899;
-  --glow: rgba(244, 114, 182, 0.25);
-  --hover-glow: rgba(251, 113, 133, 0.35);
+  /* Subtle glow in day mode */
+  --glow-color: rgba(244, 114, 182, 0.2);
+  --hover-glow: rgba(251, 113, 133, 0.3);
   
-  /* Background colors - warm pink tones, cozy */
+  /* Background colors - light, warm pink tones (clean) */
   --bg1: #fdf2f8;
   --bg2: #fce7f3;
   
-  /* Card colors - softer, more opaque */
+  /* Card colors - soft and opaque */
   --card: rgba(255, 255, 255, 0.8);
   --card-hover: rgba(255, 255, 255, 0.95);
-  --border: rgba(253, 242, 248, 0.75);
+  --border: rgba(253, 242, 248, 0.75); /* Soft borders */
   
-  /* Text colors */
+  /* Text colors - dark for readability */
   --text: #831843;
   --muted: #9f1239;
   
@@ -97,12 +180,69 @@
   --rc-radius: 20px;
   --rc-glass: rgba(255, 255, 255, 0.6);
   --rc-shadow: 0 2px 12px rgba(244, 114, 182, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --rc-primary: #f472b6;
+  --rc-primary-2: #ec4899;
   --rc-accent: #f472b6;
   --rc-accent-2: #ec4899;
+  --rc-border: rgba(253, 242, 248, 0.75);
+  --rc-focus: #f472b6;
+  --rc-glow: rgba(244, 114, 182, 0.2);
   --rc-text: #831843;
   --rc-muted: #9f1239;
   --rc-accent-rgb: 244, 114, 182;
   --rc-accent-2-rgb: 236, 72, 153;
+}
+
+/* Night Mode - Pink Theme: HOT PINK primary, blue/cyan secondary */
+/* This MUST come AFTER the day mode pink selector to properly override */
+[data-day-night="night"][data-theme="pink"] {
+  /* Background colors - near-black dark with subtle neon glow */
+  --bg1: #0a0a0f;
+  --bg2: #0f0f17;
+  
+  /* Card colors - dark with subtle transparency */
+  --card: rgba(20, 20, 30, 0.8);
+  --card-hover: rgba(25, 25, 35, 0.9);
+  
+  /* Primary color is HOT PINK (for borders, focus rings, primary buttons, active states) */
+  --primary-color: #f472b6; /* Hot pink primary */
+  --primary-color-2: #ec4899;
+  /* Electric blue/cyan becomes secondary accent (small highlights only) */
+  --secondary-accent: #06b6d4; /* Cyan for small highlights only */
+  --secondary-accent-2: #0891b2;
+  /* Legacy vars for backward compatibility - primary is hot pink */
+  --accent: #f472b6;
+  --accent2: #ec4899;
+  /* Border color - hot pink with subtle neon glow */
+  --border: rgba(244, 114, 182, 0.3); /* Hot pink border for focus states */
+  
+  /* Subtle neon glow - hot pink for primary elements */
+  --glow-color: rgba(244, 114, 182, 0.4); /* Hot pink glow for primary elements */
+  --hover-glow: rgba(236, 72, 153, 0.5);
+  --secondary-glow: rgba(6, 182, 212, 0.3); /* Cyan glow for secondary highlights */
+  
+  /* Glass effect - dark glass */
+  --glass-bg: rgba(20, 20, 30, 0.7);
+  --glass-blur: blur(20px) saturate(175%);
+  
+  /* Reality Check tokens - hot pink primary */
+  --rc-primary: #f472b6;
+  --rc-primary-2: #ec4899;
+  --rc-accent: #f472b6;
+  --rc-accent-2: #ec4899;
+  --rc-border: rgba(244, 114, 182, 0.3);
+  --rc-focus: #f472b6;
+  --rc-glow: rgba(244, 114, 182, 0.4);
+  --rc-glass: rgba(20, 20, 30, 0.7);
+  --rc-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --rc-text: #f1f5f9;
+  --rc-muted: #e2e8f0;
+  --rc-accent-rgb: 244, 114, 182;
+  --rc-accent-2-rgb: 236, 72, 153;
+  
+  /* Ensure text remains readable - light text on dark background */
+  --text: #f1f5f9; /* Light text for readability */
+  --muted: #e2e8f0; /* Slightly brighter muted for better contrast */
 }
 
 /* Rose Quartz Theme - Elevated Pink (uses pink base) */
@@ -146,6 +286,58 @@
   --rc-muted: #a21caf;
   --rc-accent-rgb: 232, 121, 249;
   --rc-accent-2-rgb: 217, 70, 239;
+}
+
+/* Night Mode - Rose Quartz Theme: Same as pink (hot pink primary) */
+/* This MUST come AFTER the day mode rose-quartz selector to properly override */
+[data-day-night="night"][data-theme="rose-quartz"] {
+  /* Background colors - near-black dark with subtle neon glow */
+  --bg1: #0a0a0f;
+  --bg2: #0f0f17;
+  
+  /* Card colors - dark with subtle transparency */
+  --card: rgba(20, 20, 30, 0.8);
+  --card-hover: rgba(25, 25, 35, 0.9);
+  
+  /* Primary color is HOT PINK (same as pink theme in night mode) */
+  --primary-color: #f472b6; /* Hot pink primary */
+  --primary-color-2: #ec4899;
+  /* Electric blue/cyan becomes secondary accent (small highlights only) */
+  --secondary-accent: #06b6d4; /* Cyan for small highlights only */
+  --secondary-accent-2: #0891b2;
+  /* Legacy vars for backward compatibility - primary is hot pink */
+  --accent: #f472b6;
+  --accent2: #ec4899;
+  /* Border color - hot pink with subtle neon glow */
+  --border: rgba(244, 114, 182, 0.3); /* Hot pink border for focus states */
+  
+  /* Subtle neon glow - hot pink for primary elements */
+  --glow-color: rgba(244, 114, 182, 0.4); /* Hot pink glow for primary elements */
+  --hover-glow: rgba(236, 72, 153, 0.5);
+  --secondary-glow: rgba(6, 182, 212, 0.3); /* Cyan glow for secondary highlights */
+  
+  /* Glass effect - dark glass */
+  --glass-bg: rgba(20, 20, 30, 0.7);
+  --glass-blur: blur(20px) saturate(175%);
+  
+  /* Reality Check tokens - hot pink primary */
+  --rc-primary: #f472b6;
+  --rc-primary-2: #ec4899;
+  --rc-accent: #f472b6;
+  --rc-accent-2: #ec4899;
+  --rc-border: rgba(244, 114, 182, 0.3);
+  --rc-focus: #f472b6;
+  --rc-glow: rgba(244, 114, 182, 0.4);
+  --rc-glass: rgba(20, 20, 30, 0.7);
+  --rc-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --rc-text: #f1f5f9;
+  --rc-muted: #e2e8f0;
+  --rc-accent-rgb: 244, 114, 182;
+  --rc-accent-2-rgb: 236, 72, 153;
+  
+  /* Ensure text remains readable - light text on dark background */
+  --text: #f1f5f9; /* Light text for readability */
+  --muted: #e2e8f0; /* Slightly brighter muted for better contrast */
 }
 
 /* Midnight AI Theme - Dark + Electric (uses ai-lab base) */
@@ -635,6 +827,59 @@
   }
 }
 
+/* Pixel Font Utility - For tiny UI labels only */
+.pixel-label {
+  font-family: 'VT323', monospace;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.625rem; /* 10px base - will be overridden by inline styles for responsiveness */
+  line-height: 1.2;
+  /* opacity set inline per usage for better control */
+}
+
+/* Login Page Animations - Subtle retro touches */
+@keyframes login-logo-float {
+  0%, 100% {
+    transform: translateY(0px);
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+  }
+  50% {
+    transform: translateY(-4px);
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.12));
+  }
+}
+
+/* Login Page Styles - Premium Netflix-style card */
+.login-input {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-input:hover {
+  border-color: color-mix(in srgb, var(--rc-accent) 30%, transparent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.login-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.login-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.login-button:hover::before {
+  left: 100%;
+}
+
 @keyframes twinkle {
   0%, 100% {
     opacity: 0.3;
@@ -671,6 +916,146 @@
     transition: background 0.4s ease, color 0.4s ease;
   }
 
+  /* Retro/CRT Overlay - Film Grain & Scanlines */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.03; /* Very subtle in day mode */
+    background-image: 
+      /* Film grain texture - subtle noise pattern */
+      repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        transparent 1px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.1) 2px,
+        transparent 3px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        transparent 1px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.1) 2px,
+        transparent 3px
+      );
+    mix-blend-mode: overlay;
+  }
+
+  /* Night Mode - Slightly stronger grain */
+  [data-day-night="night"] body::before {
+    opacity: 0.05; /* Slightly more visible in night mode */
+  }
+
+  /* Scanline Effect - Extremely Subtle */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0.02; /* Extremely subtle */
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    mix-blend-mode: multiply;
+  }
+
+  /* Night Mode - Slightly stronger scanlines */
+  [data-day-night="night"] body::after {
+    opacity: 0.04;
+  }
+
+  /* Subtle dotted divider - retro pixel separator */
+  .retro-divider {
+    border: none;
+    border-top: 1px dotted var(--rc-border, var(--border));
+    opacity: 0.4;
+    position: relative;
+  }
+
+  /* Pixel separator effect using pseudo-element dots */
+  .retro-divider::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -1px;
+    width: 100%;
+    height: 1px;
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--rc-border, var(--border)) 0px,
+      var(--rc-border, var(--border)) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+    opacity: 0.3;
+  }
+
+  /* Night Mode - Slightly more visible pixel separator */
+  [data-day-night="night"] .retro-divider::after {
+    opacity: 0.4;
+  }
+
+  /* Subtle pixel border for cards/headers */
+  .retro-pixel-border {
+    position: relative;
+  }
+
+  .retro-pixel-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border: 1px solid transparent;
+    border-image: repeating-linear-gradient(
+      90deg,
+      var(--rc-border, var(--border)) 0px,
+      var(--rc-border, var(--border)) 2px,
+      transparent 2px,
+      transparent 6px
+    ) 1;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: -1;
+    border-radius: var(--rc-radius);
+  }
+
+  /* Day Mode - Softer pixel border */
+  [data-day-night="day"] .retro-pixel-border::before {
+    opacity: 0.1;
+  }
+
+  /* Night Mode - Slightly stronger pixel border */
+  [data-day-night="night"] .retro-pixel-border::before {
+    opacity: 0.2;
+  }
+
+  /* Respect reduced motion preferences for retro effects */
+  @media (prefers-reduced-motion: reduce) {
+    body::before,
+    body::after {
+      animation: none !important;
+      opacity: 0.01; /* Even more subtle when motion is reduced */
+    }
+    
+    .button-primary::before {
+      transition: none;
+    }
+  }
+
   /* Override lowercase for user input elements */
   input,
   textarea,
@@ -705,7 +1090,7 @@
     background: var(--card);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
+    border: 1px solid var(--rc-border, var(--border));
     color: var(--text);
     border-radius: var(--border-radius);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -720,12 +1105,30 @@
   textarea:focus,
   select:focus {
     outline: none;
-    border-color: var(--accent);
+    border-color: var(--rc-focus, var(--primary));
     box-shadow: 
       inset 0 2px 4px rgba(0, 0, 0, 0.04),
       0 1px 0 rgba(255, 255, 255, 0.9),
-      0 0 0 3px var(--glow);
+      0 0 0 3px var(--rc-glow, var(--glow)),
+      /* Subtle retro glow on focus */
+      0 0 8px color-mix(in srgb, var(--rc-focus, var(--primary)) 15%, transparent);
     transform: translateY(-1px);
+  }
+  
+  /* Night Mode - Enhanced retro glow on focus ring */
+  [data-day-night="night"] input[type="text"]:focus,
+  [data-day-night="night"] input[type="time"]:focus,
+  [data-day-night="night"] input[type="date"]:focus,
+  [data-day-night="night"] textarea:focus,
+  [data-day-night="night"] select:focus {
+    border-color: var(--rc-focus, var(--primary));
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.2),
+      0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 0 3px var(--rc-glow, var(--glow)),
+      0 0 12px var(--rc-glow, var(--glow)),
+      /* Enhanced retro glow in night mode */
+      0 0 16px color-mix(in srgb, var(--rc-focus, var(--primary)) 20%, transparent);
   }
 
   input[type="text"]:hover,
@@ -756,15 +1159,30 @@
   }
 
   input[type="checkbox"]:checked {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-color: var(--accent);
-    box-shadow: 0 2px 8px var(--glow);
+    background: linear-gradient(135deg, var(--rc-primary, var(--primary)), var(--rc-primary-2, var(--primary-color-2)));
+    border-color: var(--rc-primary, var(--primary));
+    box-shadow: 
+      0 2px 8px var(--rc-glow, var(--glow)),
+      /* Subtle retro glow on checked checkbox */
+      0 0 6px color-mix(in srgb, var(--rc-primary, var(--primary)) 20%, transparent);
+  }
+  
+  /* Night Mode - Enhanced retro glow on checked */
+  [data-day-night="night"] input[type="checkbox"]:checked {
+    box-shadow: 
+      0 2px 8px var(--rc-glow, var(--glow)), 
+      0 0 12px var(--rc-glow, var(--glow)),
+      /* Enhanced retro glow in night mode */
+      0 0 10px color-mix(in srgb, var(--rc-primary, var(--primary)) 25%, transparent);
   }
 
   input[type="checkbox"]:hover {
     transform: scale(1.1);
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--hover-glow);
+    border-color: var(--rc-primary, var(--primary));
+    box-shadow: 
+      0 0 0 2px var(--hover-glow),
+      /* Subtle retro glow on hover */
+      0 0 4px color-mix(in srgb, var(--rc-primary, var(--primary)) 15%, transparent);
   }
 
   input[type="checkbox"]:checked::before {
@@ -903,16 +1321,31 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
-  /* Widget card header - uses theme variables */
+  /* Widget card header - uses theme variables with retro glow */
   .widget-card-header {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-bottom-color: var(--accent);
+    background: linear-gradient(135deg, var(--rc-primary, var(--primary)), var(--rc-primary-2, var(--primary-color-2)));
+    border-bottom-color: var(--rc-primary, var(--primary));
+    box-shadow: 
+      0 2px 4px rgba(0, 0, 0, 0.1),
+      /* Subtle retro glow on header border */
+      0 0 6px color-mix(in srgb, var(--rc-primary, var(--primary)) 10%, transparent);
   }
   
-  /* Window border - theme-aware */
+  /* Window border - theme-aware with retro glow */
   .window-border {
     border: 1px solid var(--border);
     border-radius: var(--border-radius-lg);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      /* Very subtle retro glow on window border */
+      0 0 4px color-mix(in srgb, var(--rc-primary, var(--primary)) 5%, transparent);
+  }
+  
+  /* Night Mode - Slightly stronger glow on window border */
+  [data-day-night="night"] .window-border {
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 0 6px color-mix(in srgb, var(--rc-primary, var(--primary)) 8%, transparent);
   }
 
   /* Flux theme - sharper borders */
@@ -964,23 +1397,80 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
 
-  /* Primary button - Reality Check tokens */
+  /* Primary button - uses theme tokens with retro glow */
   .button-primary {
-    background: linear-gradient(180deg, var(--rc-accent), var(--rc-accent-2));
+    background: linear-gradient(180deg, var(--rc-primary, var(--primary)), var(--rc-primary-2, var(--primary-color-2)));
     color: white;
-    border: 1px solid var(--rc-accent);
+    border: 1px solid var(--rc-primary, var(--primary));
     border-radius: var(--rc-radius);
-    box-shadow: var(--rc-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 
+      var(--rc-shadow), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.2), 
+      0 2px 0 rgba(0, 0, 0, 0.05),
+      /* Subtle retro glow - soft outer glow using primary color */
+      0 0 8px color-mix(in srgb, var(--rc-primary, var(--primary)) 15%, transparent);
     transition: all 0.3s ease;
+    position: relative;
+  }
+
+  /* Retro glow pulse effect on button */
+  .button-primary::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: var(--rc-radius);
+    background: radial-gradient(
+      ellipse at center,
+      color-mix(in srgb, var(--rc-primary, var(--primary)) 20%, transparent) 0%,
+      transparent 70%
+    );
+    opacity: 0.6;
+    z-index: -1;
+    transition: opacity 0.3s ease;
   }
 
   .button-primary:hover {
-    background: linear-gradient(180deg, var(--accent2), var(--accent));
+    background: linear-gradient(180deg, var(--rc-primary-2, var(--primary-color-2)), var(--rc-primary, var(--primary)));
     box-shadow: 
       0 6px 20px var(--hover-glow),
       inset 0 1px 0 rgba(255, 255, 255, 0.3),
-      0 3px 0 rgba(0, 0, 0, 0.05);
+      0 3px 0 rgba(0, 0, 0, 0.05),
+      /* Enhanced retro glow on hover */
+      0 0 12px color-mix(in srgb, var(--rc-primary, var(--primary)) 25%, transparent);
     transform: translateY(-1px);
+  }
+
+  .button-primary:hover::before {
+    opacity: 0.8;
+  }
+  
+  /* Night Mode - Enhanced retro glow on primary button */
+  [data-day-night="night"] .button-primary {
+    box-shadow: 
+      var(--rc-shadow), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1), 
+      0 2px 0 rgba(0, 0, 0, 0.05),
+      /* Slightly stronger glow in night mode */
+      0 0 10px color-mix(in srgb, var(--rc-primary, var(--primary)) 20%, transparent);
+  }
+  
+  [data-day-night="night"] .button-primary:hover {
+    box-shadow: 
+      0 6px 20px var(--hover-glow),
+      0 0 16px var(--rc-glow, var(--glow)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      /* Enhanced retro glow in night mode */
+      0 0 20px color-mix(in srgb, var(--rc-primary, var(--primary)) 30%, transparent);
+  }
+  
+  [data-day-night="night"] .button-primary:focus,
+  [data-day-night="night"] .button-primary:active {
+    box-shadow: 
+      0 2px 8px var(--hover-glow),
+      0 0 12px var(--rc-glow, var(--glow)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      /* Focus retro glow */
+      0 0 15px color-mix(in srgb, var(--rc-primary, var(--primary)) 25%, transparent);
   }
 
   /* Floating decorative blob */
@@ -1083,14 +1573,16 @@
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    background: linear-gradient(135deg, var(--rc-primary, var(--primary)), var(--rc-primary-2, var(--primary-color-2)));
     height: 18px;
     width: 18px;
     border-radius: 50%;
     cursor: pointer;
     box-shadow: 
-      0 2px 8px var(--glow),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      0 2px 8px var(--rc-glow, var(--glow)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      /* Subtle retro glow on range thumb */
+      0 0 5px color-mix(in srgb, var(--rc-primary, var(--primary)) 18%, transparent);
     transition: all 0.2s ease;
   }
 
@@ -1098,7 +1590,26 @@
     transform: scale(1.2);
     box-shadow: 
       0 4px 12px var(--hover-glow),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      /* Enhanced retro glow on hover */
+      0 0 8px color-mix(in srgb, var(--rc-primary, var(--primary)) 22%, transparent);
+  }
+  
+  /* Night Mode - Enhanced retro glow on range thumb */
+  [data-day-night="night"] input[type="range"]::-webkit-slider-thumb {
+    box-shadow: 
+      0 2px 8px var(--rc-glow, var(--glow)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 0 6px color-mix(in srgb, var(--rc-primary, var(--primary)) 20%, transparent);
+  }
+  
+  [data-day-night="night"] input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 
+      0 4px 12px var(--hover-glow),
+      0 0 8px var(--rc-glow, var(--glow)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      /* Enhanced retro glow in night mode */
+      0 0 12px color-mix(in srgb, var(--rc-primary, var(--primary)) 28%, transparent);
   }
   
   input[type="range"]::-moz-range-track {
@@ -1109,15 +1620,17 @@
   }
   
   input[type="range"]::-moz-range-thumb {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    background: linear-gradient(135deg, var(--rc-primary, var(--primary)), var(--rc-primary-2, var(--primary-color-2)));
     height: 18px;
     width: 18px;
     border: none;
     border-radius: 50%;
     cursor: pointer;
     box-shadow: 
-      0 2px 8px var(--glow),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      0 2px 8px var(--rc-glow, var(--glow)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      /* Subtle retro glow on range thumb */
+      0 0 5px color-mix(in srgb, var(--rc-primary, var(--primary)) 18%, transparent);
     transition: all 0.2s ease;
   }
 
@@ -1125,7 +1638,26 @@
     transform: scale(1.2);
     box-shadow: 
       0 4px 12px var(--hover-glow),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      /* Enhanced retro glow on hover */
+      0 0 8px color-mix(in srgb, var(--rc-primary, var(--primary)) 22%, transparent);
+  }
+  
+  /* Night Mode - Enhanced retro glow on range thumb */
+  [data-day-night="night"] input[type="range"]::-moz-range-thumb {
+    box-shadow: 
+      0 2px 8px var(--rc-glow, var(--glow)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 0 6px color-mix(in srgb, var(--rc-primary, var(--primary)) 20%, transparent);
+  }
+  
+  [data-day-night="night"] input[type="range"]::-moz-range-thumb:hover {
+    box-shadow: 
+      0 4px 12px var(--hover-glow),
+      0 0 8px var(--rc-glow, var(--glow)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      /* Enhanced retro glow in night mode */
+      0 0 12px color-mix(in srgb, var(--rc-primary, var(--primary)) 28%, transparent);
   }
 
 }

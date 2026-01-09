@@ -4,14 +4,15 @@
  */
 
 export const THEMES = {
-  // Existing themes
-  'soft-pink': {
-    id: 'soft-pink',
+  // Existing themes - enabled
+  'pink': {
+    id: 'pink',
     name: 'Soft Pink',
     displayName: 'soft pink',
-    internalId: 'pink', // Maps to data-theme="pink"
+    internalId: 'pink', // Maps to data-theme="pink" (canonical key)
     category: 'pink',
     description: 'For the girlies',
+    enabled: true, // Theme is available
     buttonGradient: {
       default: 'linear-gradient(135deg, #f9a8d4 0%, #f472b6 100%)',
       hover: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
@@ -28,6 +29,7 @@ export const THEMES = {
     internalId: 'ai-lab',
     category: 'neutral',
     description: 'For the guys',
+    enabled: true, // Theme is available
     buttonGradient: {
       default: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
       hover: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
@@ -37,14 +39,14 @@ export const THEMES = {
     buttonFocusRing: '0 0 0 3px rgba(139, 92, 246, 0.2)',
     showHearts: false,
   },
-  // Future themes
   'rose-quartz': {
     id: 'rose-quartz',
     name: 'Rose Quartz',
     displayName: 'rose quartz',
-    internalId: 'pink', // Uses pink theme base
+    internalId: 'rose-quartz', // Uses its own CSS selector
     category: 'pink',
     description: 'Elevated pink',
+    enabled: true, // Theme is available
     buttonGradient: {
       default: 'linear-gradient(135deg, #f5c2e7 0%, #e879f9 100%)',
       hover: 'linear-gradient(135deg, #e879f9 0%, #d946ef 100%)',
@@ -58,9 +60,10 @@ export const THEMES = {
     id: 'midnight-ai',
     name: 'Midnight AI',
     displayName: 'midnight ai',
-    internalId: 'ai-lab', // Uses ai-lab theme base
+    internalId: 'midnight-ai', // Uses its own CSS selector
     category: 'dark',
     description: 'Dark + electric accents',
+    enabled: true, // Theme is available
     buttonGradient: {
       default: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
       hover: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
@@ -74,9 +77,10 @@ export const THEMES = {
     id: 'sage-reset',
     name: 'Sage Reset',
     displayName: 'sage reset',
-    internalId: 'ai-lab', // Uses ai-lab theme base
+    internalId: 'sage-reset', // Uses its own CSS selector
     category: 'wellness',
     description: 'Green wellness',
+    enabled: true, // Theme is available
     buttonGradient: {
       default: 'linear-gradient(135deg, #86efac 0%, #4ade80 100%)',
       hover: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
@@ -90,9 +94,10 @@ export const THEMES = {
     id: 'warm-neutral',
     name: 'Warm Neutral',
     displayName: 'warm neutral',
-    internalId: 'ai-lab', // Uses ai-lab theme base
+    internalId: 'warm-neutral', // Uses its own CSS selector
     category: 'neutral',
     description: 'Beige / sand',
+    enabled: true, // Theme is available
     buttonGradient: {
       default: 'linear-gradient(135deg, #d4a574 0%, #c08452 100%)',
       hover: 'linear-gradient(135deg, #c08452 0%, #a16207 100%)',
@@ -106,9 +111,10 @@ export const THEMES = {
     id: 'lavender-tech',
     name: 'Lavender Tech',
     displayName: 'lavender tech',
-    internalId: 'ai-lab', // Uses ai-lab theme base
+    internalId: 'lavender-tech', // Uses its own CSS selector
     category: 'purple',
     description: 'Soft purple',
+    enabled: true, // Theme is available
     buttonGradient: {
       default: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
       hover: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
@@ -132,6 +138,13 @@ export function getThemeConfig(themeId) {
  */
 export function getAllThemes() {
   return Object.values(THEMES);
+}
+
+/**
+ * Get all enabled themes (excluding coming soon/disabled)
+ */
+export function getEnabledThemes() {
+  return Object.values(THEMES).filter(theme => theme.enabled !== false);
 }
 
 /**

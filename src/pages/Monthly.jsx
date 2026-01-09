@@ -24,28 +24,28 @@ const INITIAL_STATE = {
 
 const Monthly = forwardRef(function Monthly({ username, onSavingChange }, ref) {
   // Month Goals (Top 5)
-  const [monthGoals, setMonthGoals] = useLocalStorageState(
+  const [monthGoals, setMonthGoals, , flushMonthGoals] = useLocalStorageState(
     buildKey(username, 'monthly.goals'),
     INITIAL_STATE.monthGoals,
     onSavingChange
   );
 
   // Habit Tracker (6 habits x 4 weeks)
-  const [habits, setHabits] = useLocalStorageState(
+  const [habits, setHabits, , flushHabits] = useLocalStorageState(
     buildKey(username, 'monthly.habits'),
     INITIAL_STATE.habits,
     onSavingChange
   );
 
   // Key Dates
-  const [keyDates, setKeyDates] = useLocalStorageState(
+  const [keyDates, setKeyDates, , flushKeyDates] = useLocalStorageState(
     buildKey(username, 'monthly.keyDates'),
     INITIAL_STATE.keyDates,
     onSavingChange
   );
 
   // Monthly Reflection
-  const [reflection, setReflection] = useLocalStorageState(
+  const [reflection, setReflection, , flushReflection] = useLocalStorageState(
     buildKey(username, 'monthly.reflection'),
     INITIAL_STATE.reflection,
     onSavingChange
@@ -59,9 +59,18 @@ const Monthly = forwardRef(function Monthly({ username, onSavingChange }, ref) {
     setReflection(INITIAL_STATE.reflection);
   };
 
-  // Expose reset function via ref
+  // Flush all saves (force immediate save)
+  const flushAllSaves = () => {
+    flushMonthGoals();
+    flushHabits();
+    flushKeyDates();
+    flushReflection();
+  };
+
+  // Expose reset and flushSave functions via ref
   useImperativeHandle(ref, () => ({
-    reset: handleReset
+    reset: handleReset,
+    flushSave: flushAllSaves
   }));
 
   // Month Goals handlers

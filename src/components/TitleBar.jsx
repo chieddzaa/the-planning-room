@@ -1,12 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getProfilePicture, removeProfilePicture, saveProfilePicture, imageToDataURL, validateImageFile, compressImage } from '../utils/profilePicture';
+import { getEnabledThemes, getThemeConfig } from '../utils/themeConfig';
 
-export default function TitleBar({ username, themeTint, onThemeChange, theme, onThemeSwitch, onLogout, activeTab, onMenuClick }) {
+export default function TitleBar({ username, themeTint, onThemeChange, theme, onThemeSwitch, dayNightMode = 'day', onToggleDayNight, onLogout, activeTab, onMenuClick, onDone, onDoneButtonRef }) {
   const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [showThemeSwitchMenu, setShowThemeSwitchMenu] = useState(false);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [pfp, setPfp] = useState(null);
   const fileInputRef = useRef(null);
+  const doneButtonRef = useRef(null);
+
+  // Expose doneButtonRef to parent via callback (so parent can return focus)
+  useEffect(() => {
+    if (onDoneButtonRef) {
+      onDoneButtonRef(doneButtonRef);
+    }
+  }, [onDoneButtonRef]);
 
   // Load PFP when username changes
   useEffect(() => {
@@ -239,7 +248,22 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
           )}
         </div>
         
-        {/* Theme Switch (pink/ai-lab) */}
+        {/* Day/Night Mode Toggle */}
+        <div className="relative">
+          <button
+            onClick={onToggleDayNight}
+            className="px-2.5 py-1 text-xs border border-white/30 hover:bg-white/20 active:bg-white/10 transition-all duration-300 rounded-lg backdrop-blur-sm hover:scale-105 flex items-center gap-1 touch-manipulation"
+            style={{ minWidth: '44px', minHeight: '44px' }}
+            title={dayNightMode === 'day' ? 'Switch to night mode' : 'Switch to day mode'}
+            aria-label={dayNightMode === 'day' ? 'Switch to night mode' : 'Switch to day mode'}
+          >
+            <span className="text-xs">
+              {dayNightMode === 'day' ? '🌙' : '☀️'}
+            </span>
+          </button>
+        </div>
+        
+        {/* Theme Switch - All themes from THEME_CONFIG */}
         <div className="relative hidden sm:block">
           <button
             onClick={() => setShowThemeSwitchMenu(!showThemeSwitchMenu)}
@@ -256,30 +280,61 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
                 onClick={() => setShowThemeSwitchMenu(false)}
               />
               <div 
-                className="absolute right-0 top-full mt-2 bg-white/90 backdrop-blur-lg border border-gray-200/50 rounded-xl shadow-xl z-20 min-w-[160px] overflow-hidden animate-fade-in"
+                className="absolute right-0 top-full mt-2 bg-white/90 backdrop-blur-lg border border-gray-200/50 rounded-xl shadow-xl z-20 min-w-[180px] max-h-[400px] overflow-y-auto overflow-x-hidden animate-fade-in"
                 style={{
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
                 }}
               >
                 <div className="p-2">
-                  {['pink', 'ai-lab'].map((th) => (
-                    <button
-                      key={th}
-                      onClick={() => {
-                        onThemeSwitch(th);
-                        setShowThemeSwitchMenu(false);
-                      }}
-                      className={`w-full px-3 py-2 text-xs text-left hover:bg-white/60 transition-all duration-200 rounded-lg flex items-center gap-2.5 ${
-                        theme === th ? 'bg-white/80 font-medium' : ''
-                      }`}
-                    >
-                      <span className={`w-3.5 h-3.5 rounded-full border border-gray-300/50 transition-all duration-200 ${
-                        th === 'pink' ? 'bg-pink-400' :
-                        'bg-cyan-500'
-                      } ${theme === th ? 'scale-110 ring-2 ring-offset-1' : ''}`}></span>
-                      <span className="capitalize">{th}</span>
-                    </button>
-                  ))}
+                  {getEnabledThemes().map((themeConfig) => {
+                    const isSelected = theme === themeConfig.internalId;
+                    // Get color for theme indicator - extract from button gradient
+                    const getThemeColor = (gradient) => {
+                      if (!gradient) return '#06b6d4'; // Default cyan
+                      // Extract RGB values from gradient string
+                      if (gradient.includes('244, 114, 182') || gradient.includes('f472b6')) return '#f472b6'; // Pink
+                      if (gradient.includes('232, 121, 249') || gradient.includes('e879f9')) return '#e879f9'; // Purple/Rose
+                      if (gradient.includes('59, 130, 246') || gradient.includes('3b82f6')) return '#3b82f6'; // Blue
+                      if (gradient.includes('74, 222, 128') || gradient.includes('4ade80')) return '#4ade80'; // Green
+                      if (gradient.includes('192, 132, 82') || gradient.includes('c08452')) return '#c08452'; // Amber
+                      if (gradient.includes('167, 139, 250') || gradient.includes('a78bfa')) return '#a78bfa'; // Purple
+                      if (gradient.includes('139, 92, 246') || gradient.includes('8b5cf6')) return '#8b5cf6'; // Purple
+                      return '#06b6d4'; // Default cyan
+                    };
+                    const themeColor = getThemeColor(themeConfig.buttonGradient?.default);
+                    
+                    return (
+                      <button
+                        key={themeConfig.id}
+                        onClick={() => {
+                          // Use internalId (canonical key) for CSS compatibility
+                          // This is the same key used in data-theme attribute
+                          onThemeSwitch(themeConfig.internalId);
+                          setShowThemeSwitchMenu(false);
+                        }}
+                        className={`w-full px-3 py-2 text-xs text-left transition-all duration-200 rounded-lg flex items-center gap-2.5 hover:bg-white/60 ${
+                          isSelected ? 'bg-white/80 font-medium' : ''
+                        }`}
+                        title={themeConfig.description || themeConfig.name}
+                      >
+                        <span 
+                          className="w-3.5 h-3.5 rounded-full border border-gray-300/50 transition-all duration-200 flex items-center justify-center"
+                          style={{
+                            backgroundColor: themeColor,
+                            transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                            boxShadow: isSelected ? '0 0 0 2px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(255, 255, 255, 0.5)' : 'none'
+                          }}
+                        />
+                        <span className="flex-1 text-left">
+                          {/* User-friendly label: theme.name (e.g., "Rose Quartz") but key is canonical (e.g., "rose-quartz") */}
+                          {themeConfig.name}
+                        </span>
+                        {isSelected && (
+                          <span className="text-xs text-gray-600">✓</span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </>
@@ -334,6 +389,36 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
           )}
         </div>
 
+        {/* Done Button - Desktop */}
+        {onDone && (
+          <div className="relative hidden sm:block">
+            <button
+              ref={doneButtonRef}
+              onClick={onDone}
+              className="px-3 py-1.5 text-xs border border-white/30 hover:bg-white/20 active:bg-white/10 transition-all duration-300 rounded-lg backdrop-blur-sm hover:scale-105 touch-manipulation font-medium"
+              style={{ 
+                minWidth: '44px', 
+                minHeight: '44px',
+                /* Subtle retro glow on Done button */
+                boxShadow: '0 0 8px color-mix(in srgb, var(--rc-primary, var(--rc-accent)) 15%, transparent)'
+              }}
+              onFocus={(e) => {
+                e.target.style.boxShadow = `
+                  0 0 0 3px color-mix(in srgb, var(--rc-focus, var(--rc-accent)) 25%, transparent),
+                  0 0 12px color-mix(in srgb, var(--rc-primary, var(--rc-accent)) 20%, transparent)
+                `;
+              }}
+              onBlur={(e) => {
+                e.target.style.boxShadow = '0 0 8px color-mix(in srgb, var(--rc-primary, var(--rc-accent)) 15%, transparent)';
+              }}
+              title="Done - lock in your progress"
+              aria-label="Done - lock in your progress"
+            >
+              done
+            </button>
+          </div>
+        )}
+        
         <button
           onClick={onLogout}
           className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs border border-white/30 hover:bg-white/20 active:bg-white/10 transition-all duration-300 rounded-lg backdrop-blur-sm hover:scale-105 touch-manipulation"

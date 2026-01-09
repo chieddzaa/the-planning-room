@@ -27,28 +27,28 @@ const INITIAL_STATE = {
 
 const Weekly = forwardRef(function Weekly({ username, onSavingChange }, ref) {
   // Weekly Focus
-  const [weeklyFocus, setWeeklyFocus] = useLocalStorageState(
+  const [weeklyFocus, setWeeklyFocus, , flushWeeklyFocus] = useLocalStorageState(
     buildKey(username, 'weekly.focus'),
     INITIAL_STATE.weeklyFocus,
     onSavingChange
   );
 
   // Top 3 Priorities
-  const [priorities, setPriorities] = useLocalStorageState(
+  const [priorities, setPriorities, , flushPriorities] = useLocalStorageState(
     buildKey(username, 'weekly.priorities'),
     INITIAL_STATE.priorities,
     onSavingChange
   );
 
   // Weekly Plan (Mon-Sun)
-  const [weeklyPlan, setWeeklyPlan] = useLocalStorageState(
+  const [weeklyPlan, setWeeklyPlan, , flushWeeklyPlan] = useLocalStorageState(
     buildKey(username, 'weekly.plan'),
     INITIAL_STATE.weeklyPlan,
     onSavingChange
   );
 
   // Weekly Review
-  const [weeklyReview, setWeeklyReview] = useLocalStorageState(
+  const [weeklyReview, setWeeklyReview, , flushWeeklyReview] = useLocalStorageState(
     buildKey(username, 'weekly.review'),
     INITIAL_STATE.weeklyReview,
     onSavingChange
@@ -62,9 +62,18 @@ const Weekly = forwardRef(function Weekly({ username, onSavingChange }, ref) {
     setWeeklyReview(INITIAL_STATE.weeklyReview);
   };
 
-  // Expose reset function via ref
+  // Flush all saves (force immediate save)
+  const flushAllSaves = () => {
+    flushWeeklyFocus();
+    flushPriorities();
+    flushWeeklyPlan();
+    flushWeeklyReview();
+  };
+
+  // Expose reset and flushSave functions via ref
   useImperativeHandle(ref, () => ({
-    reset: handleReset
+    reset: handleReset,
+    flushSave: flushAllSaves
   }));
 
   // Priorities handlers

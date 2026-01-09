@@ -3,8 +3,10 @@ import TitleBar from './components/TitleBar';
 import Sidebar from './components/Sidebar';
 import StatusBar from './components/StatusBar';
 import BackgroundFX from './components/BackgroundFX';
-import AskAIButton from './components/AskAIButton';
-import SelahPanel from './components/SelahPanel';
+import DoneModal from './components/DoneModal';
+// TODO: Re-add Selah chat later
+// import AskAIButton from './components/AskAIButton';
+// import SelahPanel from './components/SelahPanel';
 import Login from './pages/Login';
 import Yearly from './pages/Yearly';
 import Monthly from './pages/Monthly';
@@ -14,31 +16,43 @@ import { exportPageData } from './utils/exportData';
 import { useUser } from './hooks/useUser';
 import { useThemeTint } from './hooks/useThemeTint';
 import { useTheme } from './hooks/useTheme';
+import { useDayNightMode } from './hooks/useDayNightMode';
 
 function App() {
   const { username, setUsername, logout } = useUser();
   const { themeTint, setThemeTint } = useThemeTint(username);
   const { theme, setTheme } = useTheme(username);
+  const { mode: dayNightMode, toggleMode: toggleDayNightMode } = useDayNightMode(username);
   const [activeTab, setActiveTab] = useState('yearly');
   const [isSaving, setIsSaving] = useState(false);
   const [displayTab, setDisplayTab] = useState('yearly');
-  const [selahOpen, setSelahOpen] = useState(false);
+  const [showDoneModal, setShowDoneModal] = useState(false);
+  // TODO: Re-add Selah chat later
+  // const [selahOpen, setSelahOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // Refs for page components to access reset functions
+  // Refs for page components to access reset and flushSave functions
   const yearlyRef = useRef(null);
   const monthlyRef = useRef(null);
   const weeklyRef = useRef(null);
   const dailyRef = useRef(null);
+  const doneButtonRef = useRef(null);
 
-  // Apply theme to body on mount and when theme changes
+  // Apply theme and day/night mode to body on mount and when they change
   useEffect(() => {
     if (username && theme) {
       document.body.setAttribute('data-theme', theme);
     } else {
       document.body.setAttribute('data-theme', 'ai-lab');
     }
-  }, [theme, username]);
+    
+    // Apply day/night mode
+    if (username && dayNightMode) {
+      document.body.setAttribute('data-day-night', dayNightMode);
+    } else {
+      document.body.setAttribute('data-day-night', 'day');
+    }
+  }, [theme, username, dayNightMode]);
 
   // Handle tab change with smooth transition
   const handleTabChange = useCallback((newTab) => {
@@ -90,13 +104,80 @@ function App() {
     }
   };
 
-  const handleAskSelah = () => {
-    setSelahOpen(true);
-  };
+  // Handle Done button click - save state before showing modal
+  const handleDone = useCallback(async () => {
+    // Save any unsaved changes first
+    const refs = {
+      yearly: yearlyRef,
+      monthly: monthlyRef,
+      weekly: weeklyRef,
+      daily: dailyRef
+    };
+    
+    const currentRef = refs[displayTab];
+    if (currentRef?.current?.flushSave) {
+      // Force immediate save of any pending changes
+      currentRef.current.flushSave();
+      // Small delay to ensure save completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Show modal after save completes
+    setShowDoneModal(true);
+  }, [displayTab]);
 
-  const handleCloseSelah = () => {
-    setSelahOpen(false);
-  };
+  // Callback to receive doneButtonRef from TitleBar (desktop button)
+  const handleDoneButtonRef = useCallback((ref) => {
+    if (ref) {
+      // Store ref for desktop Done button (ref is the ref object itself)
+      // Desktop and mobile buttons share the same ref pattern
+      // Mobile ref is set directly in JSX, desktop ref comes via callback
+    }
+  }, []);
+
+  // Handle modal close - return focus to Done button
+  const handleCloseDoneModal = useCallback(() => {
+    setShowDoneModal(false);
+    // Return focus to Done button (works for both desktop and mobile)
+    setTimeout(() => {
+      if (doneButtonRef.current) {
+        doneButtonRef.current.focus();
+      }
+    }, 100);
+  }, []);
+
+  // Handle Go to Dashboard (navigate to yearly/home)
+  const handleGoToDashboard = useCallback(() => {
+    handleTabChange('yearly');
+  }, [handleTabChange]);
+
+  // Handle Plan Tomorrow (navigate to daily)
+  const handlePlanTomorrow = useCallback(() => {
+    handleTabChange('daily');
+  }, [handleTabChange]);
+
+  // Handle Weekly Reset (reset weekly page)
+  const handleWeeklyReset = useCallback(() => {
+    if (weeklyRef?.current?.reset) {
+      weeklyRef.current.reset();
+    }
+    // Navigate to weekly after reset
+    handleTabChange('weekly');
+  }, [handleTabChange]);
+
+  // Handle View Progress (navigate to yearly view)
+  const handleViewProgress = useCallback(() => {
+    handleTabChange('yearly');
+  }, [handleTabChange]);
+
+  // TODO: Re-add Selah chat later
+  // const handleAskSelah = () => {
+  //   setSelahOpen(true);
+  // };
+
+  // const handleCloseSelah = () => {
+  //   setSelahOpen(false);
+  // };
 
   const renderContent = () => {
     switch (displayTab) {
@@ -107,7 +188,7 @@ function App() {
       case 'weekly':
         return <Weekly ref={weeklyRef} username={username} onSavingChange={handleSavingChange} />;
       case 'daily':
-        return <Daily ref={dailyRef} username={username} onSavingChange={handleSavingChange} />;
+        return <Daily ref={dailyRef} username={username} onSavingChange={handleSavingChange} onNavigateToWeekly={() => handleTabChange('weekly')} />;
       default:
         return <Yearly ref={yearlyRef} username={username} onSavingChange={handleSavingChange} />;
     }
@@ -176,9 +257,13 @@ function App() {
           onThemeChange={setThemeTint}
           theme={theme}
           onThemeSwitch={setTheme}
+          dayNightMode={dayNightMode}
+          onToggleDayNight={toggleDayNightMode}
           onLogout={handleLogout}
           activeTab={activeTab}
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          onDone={handleDone}
+          onDoneButtonRef={handleDoneButtonRef}
         />
         <div className="flex flex-1 overflow-hidden">
           {/* Desktop Sidebar */}
@@ -212,7 +297,7 @@ function App() {
           
           <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 relative pb-20 md:pb-6">
             {/* Theme-based Background FX - Full effects after login */}
-            <BackgroundFX theme={theme} page={displayTab} isLoginPage={false} />
+            <BackgroundFX theme={theme} dayNightMode={dayNightMode} page={displayTab} isLoginPage={false} />
             
             {/* Content with smooth page transition */}
             <div 
@@ -252,14 +337,59 @@ function App() {
                 <span className="text-[10px] font-medium">{tab.label}</span>
               </button>
             ))}
+            {/* Done Button - Mobile (sticky bottom bar) */}
+            <button
+              ref={doneButtonRef}
+              onClick={handleDone}
+                className="px-4 py-2 text-xs font-medium text-white rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 touch-manipulation"
+                style={{
+                  background: 'linear-gradient(135deg, var(--rc-accent), var(--rc-accent-2))',
+                  borderRadius: 'var(--rc-radius)',
+                  boxShadow: `
+                    var(--rc-shadow),
+                    0 0 8px color-mix(in srgb, var(--rc-primary, var(--rc-accent)) 20%, transparent),
+                    0 0 16px color-mix(in srgb, var(--rc-glow, var(--rc-accent)) 10%, transparent)
+                  `,
+                  minWidth: '60px',
+                  minHeight: '44px'
+                }}
+                onFocus={(e) => {
+                  e.target.style.boxShadow = `
+                    var(--rc-shadow),
+                    0 0 0 3px color-mix(in srgb, var(--rc-focus, var(--rc-accent)) 25%, transparent),
+                    0 0 12px color-mix(in srgb, var(--rc-primary, var(--rc-accent)) 25%, transparent),
+                    0 0 20px color-mix(in srgb, var(--rc-glow, var(--rc-accent)) 15%, transparent)
+                  `;
+                }}
+                onBlur={(e) => {
+                  e.target.style.boxShadow = `
+                    var(--rc-shadow),
+                    0 0 8px color-mix(in srgb, var(--rc-primary, var(--rc-accent)) 20%, transparent),
+                    0 0 16px color-mix(in srgb, var(--rc-glow, var(--rc-accent)) 10%, transparent)
+                  `;
+                }}
+                title="Done - lock in your progress"
+                aria-label="Done - lock in your progress"
+              >
+                done
+              </button>
           </div>
         </div>
         
-        {/* Floating Ask Selah Button - Only show when logged in */}
-        <AskAIButton onAsk={handleAskSelah} position="bottom-right" />
+        {/* Done Modal */}
+        <DoneModal
+          isOpen={showDoneModal}
+          onClose={handleCloseDoneModal}
+          onGoToDashboard={handleGoToDashboard}
+          onPlanTomorrow={handlePlanTomorrow}
+          onWeeklyReset={handleWeeklyReset}
+          onViewProgress={handleViewProgress}
+          onReturnFocus={handleCloseDoneModal}
+        />
         
-        {/* Selah Panel - Modal/Drawer */}
-        <SelahPanel isOpen={selahOpen} onClose={handleCloseSelah} theme={theme} />
+        {/* TODO: Re-add Selah chat later */}
+        {/* <AskAIButton onAsk={handleAskSelah} position="bottom-right" /> */}
+        {/* <SelahPanel isOpen={selahOpen} onClose={handleCloseSelah} theme={theme} /> */}
       </div>
     </div>
   );

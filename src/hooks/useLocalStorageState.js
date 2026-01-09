@@ -6,7 +6,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
  * @param {any} initialValue - The initial value if key doesn't exist
  * @param {Function} onSavingChange - Callback when saving state changes (isSaving: boolean)
  * @param {number} debounceMs - Debounce delay in milliseconds (default: 400)
- * @returns {[any, function, boolean]} - [value, setValue, isSaving]
+ * @returns {[any, function, boolean, function]} - [value, setValue, isSaving, flushSave]
  */
 export function useLocalStorageState(key, initialValue, onSavingChange = null, debounceMs = 400) {
   // State to store our value
@@ -81,7 +81,21 @@ export function useLocalStorageState(key, initialValue, onSavingChange = null, d
     }
   }, [storedValue, saveToStorage, key]);
 
-  return [storedValue, setValue, isSaving];
+  // Force immediate save (flush debounced saves)
+  const flushSave = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    try {
+      window.localStorage.setItem(key, JSON.stringify(storedValue));
+      setIsSaving(false);
+    } catch (error) {
+      console.error(`Error flushing save for localStorage key "${key}":`, error);
+    }
+  }, [key, storedValue]);
+
+  return [storedValue, setValue, isSaving, flushSave];
 }
 
 

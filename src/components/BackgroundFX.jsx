@@ -4,25 +4,28 @@ import { getFXConfig } from '../utils/fxConfig';
 /**
  * Background FX component - renders theme and page-specific animated graphics
  * @param {Object} props
- * @param {"pink" | "rose-quartz" | "ai-lab" | ...} props.theme - Current theme
+ * @param {"pink" | "rose-quartz" | "ai-lab" | "midnight-ai" | "sage-reset" | "warm-neutral" | "lavender-tech"} props.theme - Current theme key (same as rest of app)
+ * @param {"day" | "night"} props.dayNightMode - Current day/night mode
  * @param {"yearly" | "monthly" | "weekly" | "daily"} props.page - Current page
  * @param {boolean} props.isLoginPage - Whether this is the login page (reduced effects)
  */
-export default function BackgroundFX({ theme = 'ai-lab', page = 'weekly', isLoginPage = false }) {
-  // Map theme to config key (pink themes use 'pink' config, rose-quartz uses 'rose-quartz')
-  const configTheme = theme === 'rose-quartz' ? 'rose-quartz' : theme === 'pink' ? 'pink' : theme;
-  const config = useMemo(() => getFXConfig(configTheme, page, isLoginPage), [configTheme, page, isLoginPage]);
+export default function BackgroundFX({ theme = 'ai-lab', dayNightMode = 'day', page = 'weekly', isLoginPage = false }) {
+  // Use single computed themeKey - use theme as-is (same as rest of app, no duplicate mapping)
+  const themeKey = theme; // Use theme key directly (same as rest of app)
+  
+  // Get FX config for this theme and mode combination from fxConfig
+  const config = useMemo(() => getFXConfig(themeKey, dayNightMode, page, isLoginPage), [themeKey, dayNightMode, page, isLoginPage]);
 
-  // Generate random number between min and max (seeded by theme+page for consistency)
+  // Generate random number between min and max (seeded by theme+mode+page for consistency)
   const random = useMemo(() => {
-    const baseSeed = `${theme}-${page}`.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const baseSeed = `${themeKey}-${dayNightMode}-${page}`.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return (min, max, index = 0) => {
       // Simple seeded random using baseSeed + index
       const seed = (baseSeed * 9301 + index * 49297) % 233280;
       const normalized = (seed % 233280) / 233280;
       return min + normalized * (max - min);
     };
-  }, [theme, page]);
+  }, [themeKey, dayNightMode, page]);
 
   // Generate random integer
   const randomInt = useMemo(() => {
@@ -69,8 +72,8 @@ export default function BackgroundFX({ theme = 'ai-lab', page = 'weekly', isLogi
             animationDelay: `${delay}s`,
             willChange: 'transform, opacity',
             filter: blurAmount > 0 ? `blur(${blurAmount}px)` : 'none',
-            zIndex: blurAmount > 0 ? 0 : 1, // Blurred hearts behind
-            pointerEvents: 'none', // Ensure hearts don't interfere with interactions
+            zIndex: -1, // Behind all interactive UI
+            pointerEvents: 'none', // Critical: never block clicks
           }}
           aria-hidden="true"
         >
@@ -87,9 +90,10 @@ export default function BackgroundFX({ theme = 'ai-lab', page = 'weekly', isLogi
                 borderRadius: '50%',
                 background: `radial-gradient(circle, ${glowColor}, transparent 70%)`,
                 filter: 'blur(4px)',
-                pointerEvents: 'none',
+                pointerEvents: 'none', // Critical: never block clicks
                 zIndex: -1,
               }}
+              aria-hidden="true"
             />
           )}
           <svg
@@ -140,6 +144,8 @@ export default function BackgroundFX({ theme = 'ai-lab', page = 'weekly', isLogi
             borderRadius: '50%',
             boxShadow: `0 0 ${size * 2}px ${color}`,
             willChange: 'transform, opacity',
+            zIndex: -1,
+            pointerEvents: 'none', // Critical: never block clicks
           }}
           aria-hidden="true"
         />
@@ -179,6 +185,8 @@ export default function BackgroundFX({ theme = 'ai-lab', page = 'weekly', isLogi
             borderRadius: '50%',
             boxShadow: `0 0 ${size * 3}px ${color}`,
             willChange: 'transform, opacity',
+            zIndex: -1,
+            pointerEvents: 'none', // Critical: never block clicks
           }}
           aria-hidden="true"
         />
@@ -213,6 +221,8 @@ export default function BackgroundFX({ theme = 'ai-lab', page = 'weekly', isLogi
             transform: `rotate(${rotation}deg)`,
             transformOrigin: 'left center',
             willChange: 'transform, opacity',
+            zIndex: -1,
+            pointerEvents: 'none', // Critical: never block clicks
           }}
           aria-hidden="true"
         />
@@ -246,6 +256,8 @@ export default function BackgroundFX({ theme = 'ai-lab', page = 'weekly', isLogi
             borderRadius: '50%',
             filter: 'blur(20px)',
             willChange: 'transform, opacity',
+            zIndex: -1,
+            pointerEvents: 'none', // Critical: never block clicks
           }}
           aria-hidden="true"
         />
@@ -255,16 +267,19 @@ export default function BackgroundFX({ theme = 'ai-lab', page = 'weekly', isLogi
     return elements;
   }, [config, random, randomInt]);
 
-  // Only show hearts in pink/rose themes
-  const shouldShowHearts = theme === 'pink' || theme === 'rose-quartz';
+  // Hearts should ONLY show in Day Mode Pink + Day Mode Rose Quartz
+  const shouldShowHearts = dayNightMode === 'day' && (themeKey === 'pink' || themeKey === 'rose-quartz');
 
   return (
     <div 
       className="background-fx" 
       aria-hidden="true"
       style={{
-        pointerEvents: 'none', // Ensure background doesn't block interactions
-        zIndex: 0,
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none', // Critical: ensure background doesn't block interactions
+        zIndex: -1, // Behind all interactive UI
+        overflow: 'hidden',
       }}
     >
       {shouldShowHearts ? blushElements : fluxElements}

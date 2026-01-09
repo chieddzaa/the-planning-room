@@ -46,9 +46,10 @@ export default function Sidebar({ activeTab, onTabChange, themeTint = 'blue' }) 
                 ? `linear-gradient(135deg, var(--accent), var(--accent2))`
                 : 'transparent',
               boxShadow: activeTab === tab.id 
-                ? '0 4px 12px var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+                ? '0 4px 12px var(--glow), 0 0 8px color-mix(in srgb, var(--rc-primary, var(--accent)) 15%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
                 : 'none',
-              borderRadius: 'var(--border-radius-sm)'
+              borderRadius: 'var(--border-radius-sm)',
+              position: 'relative'
             }}
           >
             <span className="text-base w-5 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">{tab.icon}</span>

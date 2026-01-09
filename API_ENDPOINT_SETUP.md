@@ -9,9 +9,16 @@ The Selah chat interface calls `/api/selah` for intelligent, aligned planning re
 ```json
 {
   "message": "string - user's message",
+  "conversationHistory": [
+    {
+      "role": "user|assistant",
+      "content": "string - message content"
+    }
+  ],
   "context": {
     "date": "YYYY-MM-DD",
     "userEnergyToday": "low|med|high",
+    "aiMode": "observer|advisor|co-pilot",
     "yearlyGoals": [
       {
         "id": "number or string",
@@ -47,12 +54,23 @@ The Selah chat interface calls `/api/selah` for intelligent, aligned planning re
       }
     ]
   },
-  "reasoningEffort": "medium|high",
+  "mode": "greeting|planning",
+  "reasoningEffort": "low|medium|high",
   "requireStructuredOutput": true
 }
 ```
 
-### Response (Structured JSON Schema)
+### Response
+
+**For Greeting Mode** (`mode: "greeting"`):
+```json
+{
+  "response": "string - Warm greeting (1-3 short messages), always ends with question asking what user wants help with",
+  "mode": "greeting"
+}
+```
+
+**For Planning Mode** (`mode: "planning"` - Structured JSON Schema):
 ```json
 {
   "summary": "string - 1-2 sentences in Selah's voice",
@@ -81,23 +99,30 @@ The Selah chat interface calls `/api/selah` for intelligent, aligned planning re
 }
 ```
 
+**Note**: For greeting mode, the response should be warm and human, ending with a question asking what the user wants help with. For planning mode, always return structured JSON matching the schema above.
+
 ## Implementation Notes
 
 ### Model & Reasoning
 - **Model**: Use GPT-5 / GPT-5.2 or equivalent reasoning-capable model
 - **Reasoning Effort**: 
-  - `medium` by default
-  - `high` when user asks to prioritize/align/rebuild
-- **Structured Output**: Always require JSON schema output (never free text)
+  - `low` for greeting mode
+  - `medium` by default for planning mode
+  - `high` when user explicitly asks to prioritize/align/rebuild
+- **Structured Output**: Always require JSON schema output for planning mode (never free text)
+- **Conversation Memory**: Always send last 20-40 messages in `conversationHistory` for natural conversation continuity
 
 ### Tone & Style
 - **Calm**: No rushing, no pressure
 - **Faith-aware**: Can reference scripture gently, never preachy
 - **Alignment-focused**: Help connect daily actions to weekly/monthly/yearly goals
-- **Brief**: 1-2 sentences for summary
-- **Human**: Christian-bestie energy, not corporate
-- **Never**: "you must/should", never shame
-- **Always**: Give optional choices, ask clarifying questions if data is missing
+- **Brief**: 1-3 short messages max
+- **Human**: Warm, Christian-bestie energy, not corporate or preachy
+- **Never**: "you must/should", never shame, never preachy
+- **Always**: End with gentle choice/question, give optional choices
+- **Dual-mode behavior**:
+  - **Greeting mode**: If user message is a greeting ("hi", "hey", "how are you"), reply warmly like a Christian bestie, then ask what the user wants help with
+  - **Planning mode**: If user asks to plan/prioritize/align, switch to planner mode with structured JSON output
 
 ### Response Guidelines
 - Use approved language: "notice", "support", "protect your energy", "small step", "alignment", "capacity", "intentional", "reset", "tend"

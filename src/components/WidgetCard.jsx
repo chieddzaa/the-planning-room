@@ -46,16 +46,30 @@ export default function WidgetCard({
       <RealityCheckStamp variant="compact" size="sm" position="bottom-right" />
       {/* Modern glass header with Reality Check tokens */}
       <div
-        className="widget-card-header backdrop-blur-md border-b px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between transition-all duration-300 group-hover:shadow-lg"
+        className="widget-card-header backdrop-blur-md border-b px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between transition-all duration-300 group-hover:shadow-lg relative"
         style={{ 
           borderBottomWidth: '1px',
-          boxShadow: 'var(--rc-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+          boxShadow: 'var(--rc-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 6px color-mix(in srgb, var(--rc-primary, var(--rc-accent)) 10%, transparent)',
           background: `linear-gradient(135deg, var(--rc-accent), var(--rc-accent-2))`,
           borderColor: `var(--rc-accent)`,
           borderTopLeftRadius: 'var(--rc-radius)',
           borderTopRightRadius: 'var(--rc-radius)'
         }}
       >
+        {/* Subtle pixel separator line */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-px"
+          style={{
+            background: `repeating-linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.1) 0px,
+              rgba(255, 255, 255, 0.1) 2px,
+              transparent 2px,
+              transparent 4px
+            )`,
+            opacity: 0.3
+          }}
+        />
         <h3 className="text-xs sm:text-sm font-medium text-white/95 flex items-center gap-2 drop-shadow-sm transition-all duration-300 group-hover:scale-[1.02]">
           {title}
         </h3>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { callSelahAPI, generateFallbackResponse } from '../utils/selahAPI';
+import { callSelahAPI, generateFallbackResponse, isGreeting, isPlanningRequest } from '../utils/selahAPI';
 import { gatherPlanningContext } from '../utils/gatherPlanningContext';
 import { useUser } from '../hooks/useUser';
+import { buildKey } from '../utils/storageKeys';
 import RealityCheckStamp from './RealityCheckStamp';
 import Microcopy from './Microcopy';
 
@@ -38,19 +39,65 @@ export default function SelahPanel({ isOpen, onClose, theme = 'ai-lab' }) {
       color: 'var(--rc-text)'
     };
   };
+  // Messages format: [{role:"user"|"selah", text:string}]
   const [messages, setMessages] = useState([]);
   const [hasShownIntro, setHasShownIntro] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [currentMode, setCurrentMode] = useState('greeting'); // 'greeting' | 'planning'
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const isProcessingRef = useRef(false); // Prevent duplicate API calls
+
+  // Load conversation history from localStorage
+  useEffect(() => {
+    if (username) {
+      try {
+        const storedHistory = window.localStorage.getItem(buildKey(username, 'selah.conversation'));
+        if (storedHistory) {
+          const parsed = JSON.parse(storedHistory);
+          // Only load if we have messages and they're recent (within last 7 days)
+          if (parsed.messages && parsed.messages.length > 0) {
+            const lastMessageTime = new Date(parsed.messages[parsed.messages[parsed.messages.length - 1].timestamp]);
+            const daysSince = (Date.now() - lastMessageTime.getTime()) / (1000 * 60 * 60 * 24);
+            if (daysSince < 7) {
+              setMessages(parsed.messages);
+              setHasShownIntro(true);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading conversation history:', error);
+      }
+    }
+  }, [username]);
+
+  // Save conversation history to localStorage (debounced)
+  useEffect(() => {
+    if (username && messages.length > 0) {
+      const timeoutId = setTimeout(() => {
+        try {
+          window.localStorage.setItem(
+            buildKey(username, 'selah.conversation'),
+            JSON.stringify({
+              messages: messages.slice(-40), // Keep last 40 messages
+              lastUpdated: new Date().toISOString()
+            })
+          );
+        } catch (error) {
+          console.error('Error saving conversation history:', error);
+        }
+      }, 1000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [messages, username]);
 
   // First-open intro messages
   const introMessages = [
-    { id: 1, text: "Hi, I'm Selah 🕊️", sender: 'selah', timestamp: new Date() },
-    { id: 2, text: "Selah means pause, breathe, reflect.", sender: 'selah', timestamp: new Date() },
-    { id: 3, text: "I help you plan with alignment — daily actions matching weekly, monthly, and yearly goals.", sender: 'selah', timestamp: new Date() },
-    { id: 4, text: "Ask away.", sender: 'selah', timestamp: new Date() }
+    { id: 1, text: "Hi, I'm Selah 🕊️", role: 'selah' },
+    { id: 2, text: "Selah means pause, breathe, reflect.", role: 'selah' },
+    { id: 3, text: "I help you plan with alignment — daily actions matching weekly, monthly, and yearly goals.", role: 'selah' },
+    { id: 4, text: "Ask away.", role: 'selah' }
   ];
 
   // Quick action chips
@@ -72,9 +119,9 @@ export default function SelahPanel({ isOpen, onClose, theme = 'ai-lab' }) {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
-  // Show intro messages on first open
+  // Show intro messages on first open (only once)
   useEffect(() => {
-    if (isOpen && !hasShownIntro) {
+    if (isOpen && !hasShownIntro && messages.length === 0) {
       // Show intro messages with slight delay between each
       const timeouts = [];
       introMessages.forEach((msg, index) => {
@@ -89,7 +136,7 @@ export default function SelahPanel({ isOpen, onClose, theme = 'ai-lab' }) {
         timeouts.forEach(timeout => clearTimeout(timeout));
       };
     }
-  }, [isOpen, hasShownIntro]);
+  }, [isOpen, hasShownIntro, messages.length]);
 
   // Prevent body scroll when panel is open
   useEffect(() => {
@@ -112,102 +159,98 @@ export default function SelahPanel({ isOpen, onClose, theme = 'ai-lab' }) {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!inputValue.trim() || isLoading) return;
+    if (!inputValue.trim() || isLoading || isProcessingRef.current) return;
 
     const userMessageText = inputValue.trim();
     
-    // Check if this is a prioritize/align request
-    const isPrioritizeRequest = /priorit|align|rebuild|energy|order/i.test(userMessageText);
+    // Prevent duplicate calls
+    isProcessingRef.current = true;
+    setIsLoading(true);
     
-    // Add user message
+    // Detect mode
+    const detectedMode = isGreeting(userMessageText) ? 'greeting' : 
+                        isPlanningRequest(userMessageText) ? 'planning' : 
+                        currentMode;
+    
+    // Update mode if switching to planning
+    if (isPlanningRequest(userMessageText)) {
+      setCurrentMode('planning');
+    }
+    
+    // Build conversation history BEFORE updating state (to avoid stale state)
     const userMessage = {
       id: Date.now(),
       text: userMessageText,
-      sender: 'user',
-      timestamp: new Date()
+      role: 'user'
     };
-    setMessages(prev => [...prev, userMessage]);
+    
+    // Get current messages + new user message for API call
+    const allMessages = [...messages, userMessage];
+    const recentMessages = allMessages.slice(-40);
+    
+    // Convert message format: selah -> assistant, user -> user
+    const historyForAPI = recentMessages.map(msg => ({
+      role: msg.role === 'selah' ? 'assistant' : 'user',
+      content: msg.text
+    }));
+    
+    // Update UI state with user message
+    setMessages(allMessages);
     setInputValue('');
-    setIsLoading(true);
 
     try {
-      // Gather full planning context
-      const planningContext = gatherPlanningContext(username);
+      // Gather full planning context (always included)
+      // Includes: yearlyGoals, monthlyGoals, weeklyGoals, dailyTasks, aiMode
+      const planningContext = gatherPlanningContext(username, 'advisor'); // Default to advisor mode
       
-      // Call AI API with context
-      const data = await callSelahAPI(userMessageText, planningContext, isPrioritizeRequest);
+      // Debug: Log outgoing payload
+      console.log('[Selah] Outgoing API payload:', {
+        message: userMessageText,
+        history: historyForAPI,
+        context: planningContext,
+        mode: detectedMode
+      });
       
-      // Handle structured response
-      if (data.summary) {
-        // Add summary message
-        const summaryMessage = {
-          id: Date.now() + 1,
-          text: data.summary,
-          sender: 'selah',
-          timestamp: new Date(),
-          structuredData: data // Store full structured data
-        };
-        setMessages(prev => [...prev, summaryMessage]);
-        
-        // If there are top priorities, add them as a structured message
-        if (data.topPriorities && data.topPriorities.length > 0) {
-          const prioritiesMessage = {
-            id: Date.now() + 2,
-            text: formatPriorities(data.topPriorities),
-            sender: 'selah',
-            timestamp: new Date(),
-            structuredData: data
-          };
-          setMessages(prev => [...prev, prioritiesMessage]);
-        }
-        
-        // Add clarifying questions if any
-        if (data.clarifyingQuestions && data.clarifyingQuestions.length > 0) {
-          const questionsMessage = {
-            id: Date.now() + 3,
-            text: `Questions: ${data.clarifyingQuestions.join(' ')}`,
-            sender: 'selah',
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, questionsMessage]);
-        }
-        
-        // Add user choices if any
-        if (data.userChoices && data.userChoices.length > 0) {
-          const choicesMessage = {
-            id: Date.now() + 4,
-            text: formatUserChoices(data.userChoices),
-            sender: 'selah',
-            timestamp: new Date(),
-            structuredData: data
-          };
-          setMessages(prev => [...prev, choicesMessage]);
-        }
-      } else {
-        // Fallback: simple text response
-        const fallbackResponse = {
-          id: Date.now() + 1,
-          text: data.response || "I'm here. What feels most present for you right now?",
-          sender: 'selah',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, fallbackResponse]);
-      }
+      // Call AI API with context and history
+      const data = await callSelahAPI(userMessageText, planningContext, historyForAPI, detectedMode);
+      
+      // Debug: Log incoming response
+      console.log('[Selah] Incoming API response:', data);
+      
+      // Batch all response messages into a single state update to prevent render loops
+      const responseMessages = [];
+      
+      // New API returns simple reply format - display it naturally
+      // Split reply into 1-3 messages if it has line breaks
+      const replyText = data.summary || data.response || "I'm here. What feels most present for you right now?";
+      const replyParts = replyText.split('\n').filter(p => p.trim()).slice(0, 3);
+      
+      replyParts.forEach((part, index) => {
+        responseMessages.push({
+          id: Date.now() + index + 1,
+          text: part.trim(),
+          role: 'selah'
+        });
+      });
+      
+      // Batch update: add all response messages at once
+      setMessages(prev => [...prev, ...responseMessages]);
     } catch (error) {
-      console.error('Error calling Selah API:', error);
+      console.error('[Selah] Error calling API:', error);
       // Fallback to local response
       const fallbackResponse = {
         id: Date.now() + 1,
         text: generateFallbackResponse(userMessageText),
-        sender: 'selah',
-        timestamp: new Date()
+        role: 'selah'
       };
       setMessages(prev => [...prev, fallbackResponse]);
     } finally {
       setIsLoading(false);
+      isProcessingRef.current = false;
     }
   };
 
+  // Formatting functions for structured outputs
   const formatPriorities = (priorities) => {
     if (!priorities || priorities.length === 0) return '';
     
@@ -223,6 +266,41 @@ export default function SelahPanel({ isOpen, onClose, theme = 'ai-lab' }) {
         if (aligns.length > 0) text += ` (aligns: ${aligns.join(', ')})`;
       }
       text += '\n';
+    });
+    return text.trim();
+  };
+
+  const formatAlignmentLinks = (links) => {
+    if (!links || links.length === 0) return '';
+    
+    let text = 'Alignment:\n';
+    links.forEach((link, i) => {
+      text += `${i + 1}. `;
+      if (link.daily) text += `Daily: ${link.daily}`;
+      if (link.weekly) text += ` → Weekly: ${link.weekly}`;
+      if (link.monthly) text += ` → Monthly: ${link.monthly}`;
+      if (link.yearly) text += ` → Yearly: ${link.yearly}`;
+      text += '\n';
+    });
+    return text.trim();
+  };
+
+  const formatSuggestedOrder = (order) => {
+    if (!order || order.length === 0) return '';
+    
+    let text = 'Suggested order:\n';
+    order.forEach((taskId, i) => {
+      text += `${i + 1}. Task ${taskId}\n`;
+    });
+    return text.trim();
+  };
+
+  const formatClarifyingQuestions = (questions) => {
+    if (!questions || questions.length === 0) return '';
+    
+    let text = '';
+    questions.forEach((q, i) => {
+      text += `${i + 1}. ${q}\n`;
     });
     return text.trim();
   };
@@ -340,30 +418,33 @@ export default function SelahPanel({ isOpen, onClose, theme = 'ai-lab' }) {
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3" style={{ background: 'var(--bg1)' }}>
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
+          {messages.map((message) => {
+            const isUser = message.role === 'user';
+            return (
               <div
-                className={`max-w-[75%] px-4 py-2.5 ${
-                  message.sender === 'user'
-                    ? 'rounded-tr-sm' // iMessage style: user messages have small top-right corner
-                    : 'rounded-tl-sm' // Selah messages have small top-left corner
-                }`}
-                style={{
-                  ...getBubbleStyle(message.sender),
-                  borderRadius: message.sender === 'user'
-                    ? `var(--rc-radius) var(--rc-radius) var(--rc-radius) 4px`
-                    : `var(--rc-radius) var(--rc-radius) 4px var(--rc-radius)`
-                }}
+                key={message.id}
+                className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
               >
-                <p className="text-sm font-light leading-relaxed whitespace-pre-wrap">
-                  {message.text}
-                </p>
+                <div
+                  className={`max-w-[75%] px-4 py-2.5 ${
+                    isUser
+                      ? 'rounded-tr-sm' // iMessage style: user messages have small top-right corner
+                      : 'rounded-tl-sm' // Selah messages have small top-left corner
+                  }`}
+                  style={{
+                    ...getBubbleStyle(isUser ? 'user' : 'selah'),
+                    borderRadius: isUser
+                      ? `var(--rc-radius) var(--rc-radius) var(--rc-radius) 4px`
+                      : `var(--rc-radius) var(--rc-radius) 4px var(--rc-radius)`
+                  }}
+                >
+                  <p className="text-sm font-light leading-relaxed whitespace-pre-wrap">
+                    {message.text}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
 

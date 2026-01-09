@@ -22,40 +22,40 @@ const INITIAL_STATE = {
 
 const Yearly = forwardRef(function Yearly({ username, onSavingChange }, ref) {
   // Year Theme
-  const [yearTheme, setYearTheme] = useLocalStorageState(
+  const [yearTheme, setYearTheme, , flushYearTheme] = useLocalStorageState(
     buildKey(username, 'yearly.theme'),
     INITIAL_STATE.yearTheme,
     onSavingChange
   );
-  const [yearScripture, setYearScripture] = useLocalStorageState(
+  const [yearScripture, setYearScripture, , flushYearScripture] = useLocalStorageState(
     buildKey(username, 'yearly.scripture'),
     INITIAL_STATE.yearScripture,
     onSavingChange
   );
 
   // Top 10 Goals
-  const [goals, setGoals] = useLocalStorageState(
+  const [goals, setGoals, , flushGoals] = useLocalStorageState(
     buildKey(username, 'yearly.goals'),
     INITIAL_STATE.goals,
     onSavingChange
   );
 
   // Life Areas
-  const [lifeAreas, setLifeAreas] = useLocalStorageState(
+  const [lifeAreas, setLifeAreas, , flushLifeAreas] = useLocalStorageState(
     buildKey(username, 'yearly.lifeAreas'),
     INITIAL_STATE.lifeAreas,
     onSavingChange
   );
 
   // Milestones
-  const [milestones, setMilestones] = useLocalStorageState(
+  const [milestones, setMilestones, , flushMilestones] = useLocalStorageState(
     buildKey(username, 'yearly.milestones'),
     INITIAL_STATE.milestones,
     onSavingChange
   );
 
   // Vision Notes
-  const [visionNotes, setVisionNotes] = useLocalStorageState(
+  const [visionNotes, setVisionNotes, , flushVisionNotes] = useLocalStorageState(
     buildKey(username, 'yearly.visionNotes'),
     INITIAL_STATE.visionNotes,
     onSavingChange
@@ -71,9 +71,20 @@ const Yearly = forwardRef(function Yearly({ username, onSavingChange }, ref) {
     setVisionNotes(INITIAL_STATE.visionNotes);
   };
 
-  // Expose reset function via ref
+  // Flush all saves (force immediate save)
+  const flushAllSaves = () => {
+    flushYearTheme();
+    flushYearScripture();
+    flushGoals();
+    flushLifeAreas();
+    flushMilestones();
+    flushVisionNotes();
+  };
+
+  // Expose reset and flushSave functions via ref
   useImperativeHandle(ref, () => ({
-    reset: handleReset
+    reset: handleReset,
+    flushSave: flushAllSaves
   }));
 
   // Goal handlers

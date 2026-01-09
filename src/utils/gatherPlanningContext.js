@@ -3,9 +3,10 @@ import { buildKey } from './storageKeys';
 /**
  * Gather all planning context for Selah AI
  * @param {string} username - The username
+ * @param {string} aiMode - Selected AI mode: 'observer' | 'advisor' | 'co-pilot' (default: 'advisor')
  * @returns {Object} Planning context object
  */
-export function gatherPlanningContext(username) {
+export function gatherPlanningContext(username, aiMode = 'advisor') {
   if (!username) {
     return getEmptyContext();
   }
@@ -77,7 +78,8 @@ export function gatherPlanningContext(username) {
       yearlyGoals,
       monthlyGoals,
       weeklyGoals,
-      dailyTasks
+      dailyTasks,
+      aiMode: aiMode || 'advisor' // Include selected AI mode
     };
   } catch (error) {
     console.error('Error gathering planning context:', error);
@@ -95,7 +97,8 @@ function getEmptyContext() {
     yearlyGoals: [],
     monthlyGoals: [],
     weeklyGoals: [],
-    dailyTasks: []
+    dailyTasks: [],
+    aiMode: 'advisor'
   };
 }
 
@@ -133,10 +136,26 @@ function mapEnergyToLevel(energyValue) {
 
 /**
  * Map task to energy level
+ * Infers from task text or uses default 'med'
+ * Tasks with words like "rest", "relax", "chill" -> low energy
+ * Tasks with words like "workout", "exercise", "meeting" -> high energy
  */
 function mapEnergyLevel(task) {
-  // Could infer from task text or use default
-  // For now, return medium as default
+  if (!task || !task.text) return 'med';
+  
+  const lowerText = task.text.toLowerCase();
+  
+  // Low energy indicators
+  if (/rest|relax|chill|nap|sleep|meditate|pray|read|watch/i.test(lowerText)) {
+    return 'low';
+  }
+  
+  // High energy indicators
+  if (/workout|exercise|run|gym|meeting|presentation|deadline|urgent|important/i.test(lowerText)) {
+    return 'high';
+  }
+  
+  // Default to medium
   return 'med';
 }
 
