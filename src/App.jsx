@@ -23,6 +23,7 @@ function App() {
   const [isSaving, setIsSaving] = useState(false);
   const [displayTab, setDisplayTab] = useState('yearly');
   const [selahOpen, setSelahOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Refs for page components to access reset functions
   const yearlyRef = useRef(null);
@@ -177,14 +178,39 @@ function App() {
           onThemeSwitch={setTheme}
           onLogout={handleLogout}
           activeTab={activeTab}
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
         />
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar 
-            activeTab={activeTab} 
-            onTabChange={handleTabChange}
-            themeTint={themeTint}
-          />
-          <main className="flex-1 overflow-y-auto p-6 relative">
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block">
+            <Sidebar 
+              activeTab={activeTab} 
+              onTabChange={handleTabChange}
+              themeTint={themeTint}
+            />
+          </div>
+          
+          {/* Mobile Sidebar Overlay */}
+          {sidebarOpen && (
+            <>
+              <div 
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+                onClick={() => setSidebarOpen(false)}
+              />
+              <div className="fixed inset-y-0 left-0 z-50 md:hidden">
+                <Sidebar 
+                  activeTab={activeTab} 
+                  onTabChange={(tab) => {
+                    handleTabChange(tab);
+                    setSidebarOpen(false);
+                  }}
+                  themeTint={themeTint}
+                />
+              </div>
+            </>
+          )}
+          
+          <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 relative pb-20 md:pb-6">
             {/* Theme-based Background FX - Full effects after login */}
             <BackgroundFX theme={theme} page={displayTab} isLoginPage={false} />
             
@@ -198,6 +224,36 @@ function App() {
           </main>
         </div>
         <StatusBar onExport={handleExport} onReset={handleReset} isSaving={isSaving} />
+        
+        {/* Mobile Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200/50 z-30 md:hidden">
+          <div className="flex items-center justify-around px-2 py-2">
+            {[
+              { id: 'yearly', label: 'yearly', icon: '📆' },
+              { id: 'monthly', label: 'monthly', icon: '📅' },
+              { id: 'weekly', label: 'weekly', icon: '📋' },
+              { id: 'daily', label: 'daily', icon: '✓' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`flex flex-col items-center justify-center px-3 py-2 min-w-[60px] rounded-lg transition-all ${
+                  activeTab === tab.id
+                    ? 'text-white'
+                    : 'text-gray-600'
+                }`}
+                style={{
+                  background: activeTab === tab.id 
+                    ? `linear-gradient(135deg, var(--accent), var(--accent2))`
+                    : 'transparent',
+                }}
+              >
+                <span className="text-lg mb-1">{tab.icon}</span>
+                <span className="text-[10px] font-medium">{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
         
         {/* Floating Ask Selah Button - Only show when logged in */}
         <AskAIButton onAsk={handleAskSelah} position="bottom-right" />

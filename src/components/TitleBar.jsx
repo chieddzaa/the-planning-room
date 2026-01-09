@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getProfilePicture, removeProfilePicture, saveProfilePicture, imageToDataURL, validateImageFile } from '../utils/profilePicture';
 
-export default function TitleBar({ username, themeTint, onThemeChange, theme, onThemeSwitch, onLogout, activeTab }) {
+export default function TitleBar({ username, themeTint, onThemeChange, theme, onThemeSwitch, onLogout, activeTab, onMenuClick }) {
   const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [showThemeSwitchMenu, setShowThemeSwitchMenu] = useState(false);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
@@ -89,14 +89,42 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
 
   return (
     <div 
-      className="backdrop-blur-md text-white px-4 py-2 flex items-center justify-between border-b select-none transition-all duration-300 shadow-sm"
+      className="backdrop-blur-md text-white px-3 sm:px-4 py-2 flex items-center justify-between border-b select-none transition-all duration-300 shadow-sm"
       style={{
         background: `linear-gradient(135deg, var(--accent), var(--accent2))`,
         borderColor: `var(--accent)`,
         boxShadow: '0 2px 10px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
       }}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        {/* Mobile Menu Button */}
+        {onMenuClick && (
+          <button
+            onClick={onMenuClick}
+            className="md:hidden p-2 -ml-2 rounded-lg hover:bg-white/20 transition-colors touch-manipulation"
+            style={{ minWidth: '44px', minHeight: '44px' }}
+            aria-label="Menu"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 5H17M3 10H17M3 15H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
+        )}
+        
+        {/* Logo - Hidden on very small screens */}
+        <img 
+          src="/logo.png" 
+          alt="Reality Check" 
+          className="h-5 sm:h-6 w-auto object-contain flex-shrink-0 hidden xs:block"
+          style={{
+            filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+            opacity: 0.95
+          }}
+          onError={(e) => {
+            e.target.style.display = 'none';
+          }}
+        />
+        <div className="h-4 w-px bg-white/20 hidden sm:block"></div>
         {/* Logo */}
         <img 
           src="/logo.png" 
@@ -113,9 +141,9 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
         />
         <div className="h-4 w-px bg-white/20"></div>
         {/* Reality Check Wordmark */}
-        <div className="flex flex-col">
+        <div className="flex flex-col min-w-0">
           <h1 
-            className="text-sm font-semibold tracking-tight leading-none"
+            className="text-xs sm:text-sm font-semibold tracking-tight leading-none truncate"
             style={{
               color: 'rgba(255, 255, 255, 0.95)',
               letterSpacing: '-0.01em'
@@ -125,7 +153,7 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
           </h1>
           {activeTab === 'yearly' && (
             <p 
-              className="text-xs font-light mt-0.5 leading-tight"
+              className="text-[10px] sm:text-xs font-light mt-0.5 leading-tight hidden sm:block"
               style={{
                 color: 'rgba(255, 255, 255, 0.7)',
                 letterSpacing: '0.02em'
@@ -135,19 +163,21 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
             </p>
           )}
         </div>
-        <div className="h-4 w-px bg-white/20"></div>
-        <span className="text-xs font-light tracking-wide" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+        <div className="h-4 w-px bg-white/20 hidden md:block"></div>
+        <span className="text-[10px] sm:text-xs font-light tracking-wide hidden sm:inline" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
           welcome back, {username.toLowerCase()}
         </span>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
         {/* User Avatar with hover effect and menu */}
         <div className="relative">
           <button
             onClick={() => setShowAvatarMenu(!showAvatarMenu)}
-            className="w-7 h-7 rounded-full border-2 border-white/30 flex items-center justify-center text-xs font-semibold backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white/30 cursor-pointer overflow-hidden"
+            className="w-8 h-8 sm:w-7 sm:h-7 rounded-full border-2 border-white/30 flex items-center justify-center text-xs font-semibold backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white/30 cursor-pointer overflow-hidden touch-manipulation"
             style={{
-              background: pfp ? 'transparent' : 'rgba(255, 255, 255, 0.2)'
+              background: pfp ? 'transparent' : 'rgba(255, 255, 255, 0.2)',
+              minWidth: '44px',
+              minHeight: '44px'
             }}
           >
             {pfp ? (
@@ -204,10 +234,11 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
         </div>
         
         {/* Theme Switch (pink/ai-lab) */}
-        <div className="relative">
+        <div className="relative hidden sm:block">
           <button
             onClick={() => setShowThemeSwitchMenu(!showThemeSwitchMenu)}
-            className="px-2.5 py-1 text-xs border border-white/30 hover:bg-white/20 active:bg-white/10 transition-all duration-300 rounded-lg backdrop-blur-sm hover:scale-105 flex items-center gap-1"
+            className="px-2.5 py-1 text-xs border border-white/30 hover:bg-white/20 active:bg-white/10 transition-all duration-300 rounded-lg backdrop-blur-sm hover:scale-105 flex items-center gap-1 touch-manipulation"
+            style={{ minWidth: '44px', minHeight: '44px' }}
             title="switch theme"
           >
             <span className="text-xs">🎨</span>
@@ -250,10 +281,11 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
         </div>
 
         {/* Theme Tint Selector (blue/green/orange) */}
-        <div className="relative">
+        <div className="relative hidden sm:block">
           <button
             onClick={() => setShowThemeMenu(!showThemeMenu)}
-            className="px-2.5 py-1 text-xs border border-white/30 hover:bg-white/20 active:bg-white/10 transition-all duration-300 rounded-lg backdrop-blur-sm hover:scale-105 flex items-center gap-1"
+            className="px-2.5 py-1 text-xs border border-white/30 hover:bg-white/20 active:bg-white/10 transition-all duration-300 rounded-lg backdrop-blur-sm hover:scale-105 flex items-center gap-1 touch-manipulation"
+            style={{ minWidth: '44px', minHeight: '44px' }}
             title="theme tint"
           >
             <span className="text-xs">🎨</span>
@@ -298,12 +330,14 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
 
         <button
           onClick={onLogout}
-          className="px-3 py-1 text-xs border border-white/30 hover:bg-white/20 active:bg-white/10 transition-all duration-300 rounded-lg backdrop-blur-sm hover:scale-105"
+          className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs border border-white/30 hover:bg-white/20 active:bg-white/10 transition-all duration-300 rounded-lg backdrop-blur-sm hover:scale-105 touch-manipulation"
+          style={{ minWidth: '44px', minHeight: '44px' }}
           title="log out"
         >
-          log out
+          <span className="hidden sm:inline">log out</span>
+          <span className="sm:hidden">out</span>
         </button>
-        <div className="flex gap-1 ml-1">
+        <div className="hidden md:flex gap-1 ml-1">
           <button 
             className={`w-6 h-6 flex items-center justify-center rounded transition-all duration-300 hover:scale-110 hover:bg-white/20 active:scale-95`}
             aria-label="Minimize"

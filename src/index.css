@@ -339,6 +339,45 @@
   box-shadow: var(--rc-shadow);
 }
 
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  /* Touch-friendly targets */
+  button:not(.no-touch-target), 
+  a:not(.no-touch-target), 
+  input[type="button"]:not(.no-touch-target), 
+  input[type="submit"]:not(.no-touch-target) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent text size adjustment on iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+  
+  /* Better scrolling on mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Reduce padding on mobile for more content space */
+  .widget-card-container {
+    margin-bottom: 1rem;
+  }
+  
+  /* Stack grid columns on mobile */
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Animations */
 @keyframes float {
   0%, 100% {

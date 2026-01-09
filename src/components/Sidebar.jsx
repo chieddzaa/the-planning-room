@@ -19,7 +19,7 @@ export default function Sidebar({ activeTab, onTabChange, themeTint = 'blue' }) 
 
   return (
     <div 
-      className="bg-white/40 backdrop-blur-lg border-r border-gray-200/50 w-48 flex flex-col shadow-md animate-slide-in"
+      className="bg-white/40 backdrop-blur-lg border-r border-gray-200/50 w-48 md:w-48 flex flex-col shadow-md animate-slide-in h-full"
       style={{
         boxShadow: '2px 0 10px rgba(0, 0, 0, 0.05), inset -1px 0 0 rgba(255, 255, 255, 0.2)',
         borderTopLeftRadius: 'var(--border-radius-lg)',
@@ -34,12 +34,13 @@ export default function Sidebar({ activeTab, onTabChange, themeTint = 'blue' }) 
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all duration-200 group relative overflow-hidden
+            className={`w-full px-4 py-3 text-left text-sm flex items-center gap-3 transition-all duration-200 group relative overflow-hidden touch-manipulation
               ${activeTab === tab.id
                 ? 'text-white shadow-lg scale-[1.02] translate-x-1'
                 : 'text-gray-700 hover:bg-white/60 active:bg-white/80 hover:scale-[1.01]'
               }`}
             style={{
+              minHeight: '44px', // Touch-friendly minimum
               animationDelay: `${0.1 + index * 0.05}s`,
               background: activeTab === tab.id 
                 ? `linear-gradient(135deg, var(--accent), var(--accent2))`

@@ -46,7 +46,7 @@ export default function WidgetCard({
       <RealityCheckStamp variant="compact" size="sm" position="bottom-right" />
       {/* Modern glass header with Reality Check tokens */}
       <div
-        className="widget-card-header backdrop-blur-md border-b px-4 py-2.5 flex items-center justify-between transition-all duration-300 group-hover:shadow-lg"
+        className="widget-card-header backdrop-blur-md border-b px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between transition-all duration-300 group-hover:shadow-lg"
         style={{ 
           borderBottomWidth: '1px',
           boxShadow: 'var(--rc-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
@@ -56,7 +56,7 @@ export default function WidgetCard({
           borderTopRightRadius: 'var(--rc-radius)'
         }}
       >
-        <h3 className="text-sm font-medium text-white/95 flex items-center gap-2 drop-shadow-sm transition-all duration-300 group-hover:scale-[1.02]">
+        <h3 className="text-xs sm:text-sm font-medium text-white/95 flex items-center gap-2 drop-shadow-sm transition-all duration-300 group-hover:scale-[1.02]">
           {title}
         </h3>
         {actions && (
@@ -68,7 +68,7 @@ export default function WidgetCard({
       
       {/* Glassmorphism body with Reality Check tokens */}
       <div 
-        className="glass-card p-5"
+        className="glass-card p-3 sm:p-4 md:p-5"
         style={{
           transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
           background: 'var(--rc-glass)',

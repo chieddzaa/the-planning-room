@@ -261,9 +261,10 @@ export default function SelahPanel({ isOpen, onClose, theme = 'ai-lab' }) {
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
-          maxWidth: '420px', // Ensure max width on larger screens
+          maxWidth: '420px',
           boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.08)',
-          borderLeft: '1px solid rgba(0, 0, 0, 0.05)'
+          borderLeft: '1px solid rgba(0, 0, 0, 0.05)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)' // Safe area for mobile
         }}
         role="dialog"
         aria-modal="true"

@@ -24,18 +24,21 @@ export default function AskAIButton({ onAsk, position = 'bottom-right' }) {
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`fixed ${positionClasses[position]} z-[9997] px-4 py-3 rounded-full text-sm font-medium text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105`}
+      className={`fixed ${positionClasses[position]} z-[9997] px-4 sm:px-4 py-3 sm:py-3 rounded-full text-xs sm:text-sm font-medium text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 touch-manipulation mb-16 sm:mb-6`}
       style={{
         background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
         boxShadow: isHovered 
           ? '0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1)'
           : '0 4px 12px rgba(0, 0, 0, 0.1)',
-        pointerEvents: 'auto', // Ensure button is always clickable
+        pointerEvents: 'auto',
+        minWidth: '44px',
+        minHeight: '44px'
       }}
       aria-label="Ask Selah"
     >
-      <span className="flex items-center gap-2">
-        <span>ask selah</span>
+      <span className="flex items-center gap-1 sm:gap-2">
+        <span className="hidden sm:inline">ask selah</span>
+        <span className="sm:hidden">selah</span>
         <span className="text-xs">💭</span>
       </span>
     </button>

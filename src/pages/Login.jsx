@@ -125,7 +125,7 @@ export default function Login({ onLogin }) {
       />
 
       {/* Center Card */}
-      <div className="relative w-full max-w-md mx-4 z-10">
+      <div className="relative w-full max-w-md mx-4 z-10 px-2 sm:px-0">
         {/* Clean Card with glass effect */}
         <div 
           className="overflow-hidden"
@@ -139,13 +139,13 @@ export default function Login({ onLogin }) {
           }}
         >
           {/* Card Body */}
-          <div className="px-12 py-20">
+          <div className="px-6 sm:px-12 py-12 sm:py-20">
             {/* Logo - Larger and more prominent */}
-            <div className="mb-16 flex justify-center">
+            <div className="mb-12 sm:mb-16 flex justify-center">
               <img 
                 src="/logo.png" 
                 alt="Reality Check" 
-                className="w-48 h-auto object-contain"
+                className="w-32 sm:w-48 h-auto object-contain"
                 style={{
                   filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08))',
                   mixBlendMode: 'normal'
@@ -158,9 +158,9 @@ export default function Login({ onLogin }) {
             </div>
             
             {/* Heading - ONE headline, ONE supporting line */}
-            <div className="mb-14 text-center">
+            <div className="mb-10 sm:mb-14 text-center">
               <h2 
-                className="text-3xl font-bold tracking-tight mb-3"
+                className="text-2xl sm:text-3xl font-bold tracking-tight mb-2 sm:mb-3"
                 style={{
                   color: 'var(--rc-text)'
                 }}
@@ -168,7 +168,7 @@ export default function Login({ onLogin }) {
                 the planning room
               </h2>
               <p 
-                className="text-sm font-light"
+                className="text-xs sm:text-sm font-light"
                 style={{
                   color: 'var(--rc-muted)'
                 }}
