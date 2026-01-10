@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Yearly Life Areas Check-in Animation */
+@keyframes fadeInOut {
+  0% { 
+    opacity: 0; 
+    transform: translateY(-4px); 
+  }
+  20% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+  80% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: translateY(-4px); 
+  }
+}
+
+.life-area-feedback {
+  animation: fadeInOut 1.5s ease-in-out;
+}
+
 /* Reality Check Design Tokens - Global Branding System */
 :root {
   /* Standard tokens that map to theme-specific values */

@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useImperativeHandle, forwardRef, useState } from 'react';
 import WidgetCard from '../components/WidgetCard';
 import { useLocalStorageState } from '../hooks/useLocalStorageState';
 import { buildKey } from '../utils/storageKeys';
@@ -104,9 +104,26 @@ const Yearly = forwardRef(function Yearly({ username, onSavingChange }, ref) {
     });
   };
 
+  // Life Area feedback state (shows brief "Locked in" message)
+  const [lifeAreaFeedback, setLifeAreaFeedback] = useState({});
+
   // Life Area handlers
   const updateLifeArea = (area, value) => {
-    setLifeAreas(prev => ({ ...prev, [area]: parseInt(value) }));
+    const intValue = parseInt(value);
+    setLifeAreas(prev => ({ ...prev, [area]: intValue }));
+  };
+
+  const handleLifeAreaRelease = (area) => {
+    // Show brief feedback
+    setLifeAreaFeedback(prev => ({ ...prev, [area]: true }));
+    // Hide feedback after animation
+    setTimeout(() => {
+      setLifeAreaFeedback(prev => {
+        const updated = { ...prev };
+        delete updated[area];
+        return updated;
+      });
+    }, 1500);
   };
 
   // Milestone handlers
@@ -190,6 +207,16 @@ const Yearly = forwardRef(function Yearly({ username, onSavingChange }, ref) {
       {/* Life Areas */}
       <WidgetCard title="life areas" accent="orange">
         <div className="space-y-4">
+          {/* Helper text */}
+          <div className="mb-3 p-3 bg-orange-50/50 border border-orange-200/50 rounded-sm">
+            <p className="text-xs text-gray-600 leading-relaxed mb-1">
+              <strong className="font-medium text-gray-700">Drag each circle to the number that feels true for you.</strong>
+            </p>
+            <p className="text-xs text-gray-500 italic">
+              This isn't a score — it's a check-in. There are no right or wrong answers. This reflects how you <em>feel</em> in each life area right now.
+            </p>
+          </div>
+
           {[
             { key: 'faith', label: 'faith' },
             { key: 'health', label: 'health' },
@@ -197,19 +224,71 @@ const Yearly = forwardRef(function Yearly({ username, onSavingChange }, ref) {
             { key: 'money', label: 'money' },
             { key: 'relationships', label: 'relationships' },
           ].map(({ key, label }) => (
-            <div key={key} className="space-y-1">
+            <div key={key} className="space-y-2 relative">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-700">{label}</label>
-                <span className="text-xs text-gray-600 w-8 text-right">{lifeAreas[key]}/10</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-600 w-8 text-right transition-all duration-300">{lifeAreas[key]}/10</span>
+                  {lifeAreaFeedback[key] && (
+                    <span className="text-xs text-orange-600 font-medium life-area-feedback">
+                      noted
+                    </span>
+                  )}
+                </div>
               </div>
-              <input
-                type="range"
-                min="0"
-                max="10"
-                value={lifeAreas[key]}
-                onChange={(e) => updateLifeArea(key, e.target.value)}
-                className="w-full"
-              />
+              <div className="relative">
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  step="1"
+                  value={lifeAreas[key]}
+                  onChange={(e) => updateLifeArea(key, e.target.value)}
+                  onMouseUp={() => handleLifeAreaRelease(key)}
+                  onTouchEnd={() => handleLifeAreaRelease(key)}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer transition-all duration-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-50"
+                  style={{
+                    background: `linear-gradient(to right, #fb923c 0%, #fb923c ${(lifeAreas[key] / 10) * 100}%, #e5e7eb ${(lifeAreas[key] / 10) * 100}%, #e5e7eb 100%)`
+                  }}
+                />
+                {/* Custom slider thumb styling */}
+                <style>{`
+                  input[type="range"]::-webkit-slider-thumb {
+                    appearance: none;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background: #fb923c;
+                    cursor: pointer;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                  }
+                  input[type="range"]::-webkit-slider-thumb:hover {
+                    transform: scale(1.1);
+                    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+                  }
+                  input[type="range"]::-webkit-slider-thumb:active {
+                    transform: scale(0.95);
+                  }
+                  input[type="range"]::-moz-range-thumb {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background: #fb923c;
+                    cursor: pointer;
+                    border: none;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                  }
+                  input[type="range"]::-moz-range-thumb:hover {
+                    transform: scale(1.1);
+                    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+                  }
+                  input[type="range"]::-moz-range-thumb:active {
+                    transform: scale(0.95);
+                  }
+                `}</style>
+              </div>
             </div>
           ))}
         </div>
