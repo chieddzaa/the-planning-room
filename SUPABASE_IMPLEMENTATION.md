@@ -125,3 +125,4 @@ See `SUPABASE_SETUP.md` for complete SQL migration script.
    - Data syncs when pages use `useSyncedState`
    - Migration prompt appears if local data exists
 
+

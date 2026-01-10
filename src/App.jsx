@@ -5,7 +5,6 @@ import StatusBar from './components/StatusBar';
 import BackgroundFX from './components/BackgroundFX';
 import DoneModal from './components/DoneModal';
 import InstallPrompt from './components/InstallPrompt';
-import MigrateGuestDataModal from './components/MigrateGuestDataModal';
 // TODO: Re-add Selah chat later
 // import AskAIButton from './components/AskAIButton';
 // import SelahPanel from './components/SelahPanel';
@@ -19,8 +18,6 @@ import { useUser } from './hooks/useUser';
 import { useThemeTint } from './hooks/useThemeTint';
 import { useTheme } from './hooks/useTheme';
 import { useDayNightMode } from './hooks/useDayNightMode';
-import { useAuth } from './hooks/useAuth';
-import { buildKey } from './utils/storageKeys';
 
 function App() {
   const { username, setUsername, logout } = useUser();
@@ -76,23 +73,6 @@ function App() {
     setIsSaving(saving);
   }, []);
 
-  // Check if user has local data that needs migration when they sign in
-  useEffect(() => {
-    if (isAuthenticated && supabaseUser && username && !localStorage.getItem('pwa-data-migrated')) {
-      // Check if there's any localStorage data for this username
-      const hasLocalData = Object.keys(localStorage).some(key => 
-        key.startsWith(`planning-room:${username}:`)
-      );
-
-      if (hasLocalData) {
-        // Show migration prompt after a short delay
-        setTimeout(() => {
-          setShowMigrateModal(true);
-        }, 1000);
-      }
-    }
-  }, [isAuthenticated, supabaseUser, username]);
-
   const handleLogin = (newUsername, newTheme) => {
     setUsername(newUsername);
     // Theme is already saved in Login component, just trigger re-read
@@ -100,11 +80,6 @@ function App() {
       setTheme(newTheme);
     }
   };
-
-  const handleMigrationComplete = useCallback(() => {
-    localStorage.setItem('pwa-data-migrated', 'true');
-    setShowMigrateModal(false);
-  }, []);
 
   const handleLogout = () => {
     logout();
@@ -415,15 +390,6 @@ function App() {
         
         {/* PWA Install Prompt */}
         <InstallPrompt />
-        
-        {/* Migration Modal - Prompts to sync guest data when user signs in */}
-        {username && (
-          <MigrateGuestDataModal
-            isOpen={showMigrateModal}
-            onClose={handleMigrationComplete}
-            username={username}
-          />
-        )}
         
         {/* TODO: Re-add Selah chat later */}
         {/* <AskAIButton onAsk={handleAskSelah} position="bottom-right" /> */}

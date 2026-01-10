@@ -7,11 +7,12 @@ import AuthModal from './AuthModal';
  * Minimal, on-brand design
  */
 export default function SyncStatus() {
-  const { user, signOut, isAuthenticated, isSupabaseConfigured } = useAuth();
+  const { user, signOut, isAuthenticated, isSupabaseConfigured, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  if (!isSupabaseConfigured) {
-    return null; // Don't show sync UI if Supabase isn't configured
+  // Don't render while loading or if Supabase isn't configured
+  if (loading || !isSupabaseConfigured) {
+    return null;
   }
 
   return (
@@ -141,4 +142,5 @@ export default function SyncStatus() {
     </>
   );
 }
+
 

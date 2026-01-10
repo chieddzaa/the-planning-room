@@ -100,3 +100,4 @@ The app will automatically:
 - All data is encrypted in transit (HTTPS required)
 - Row Level Security ensures users only see their own data
 
+
