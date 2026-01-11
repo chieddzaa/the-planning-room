@@ -40,8 +40,10 @@ const APPROVED_WORDS = [
 
 /**
  * Generate AI insight for Daily Planning
+ * @param {Object} dailyData - Daily planning data
+ * @param {string} mode - 'personal' | 'work'
  */
-export function generateDailyInsight(dailyData) {
+export function generateDailyInsight(dailyData, mode = 'personal') {
   const { schedule, top3Today, tasks, moodEnergy } = dailyData;
   
   // Count items

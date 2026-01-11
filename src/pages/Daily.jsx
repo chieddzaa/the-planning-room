@@ -7,6 +7,8 @@ import { useLocalStorageState } from '../hooks/useLocalStorageState';
 import { buildKey } from '../utils/storageKeys';
 import { generateDailyInsight } from '../utils/aiAssistant';
 import Microcopy from '../components/Microcopy';
+import { getPrompts } from '../utils/prompts';
+import Badge from '../components/ui/Badge';
 
 // Initial state constants
 const INITIAL_STATE = {
@@ -17,7 +19,7 @@ const INITIAL_STATE = {
   moodEnergy: { mood: 3, energy: 3 },
 };
 
-const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateToWeekly }, ref) {
+const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateToWeekly, mode = 'personal', teamState = { mode: 'solo' } }, ref) {
   const [showDoneModal, setShowDoneModal] = useState(false);
   const [showConfirmEmpty, setShowConfirmEmpty] = useState(false);
 
@@ -152,8 +154,8 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
       top3Today,
       tasks,
       moodEnergy
-    });
-  }, [schedule, top3Today, tasks, moodEnergy]);
+    }, mode);
+  }, [schedule, top3Today, tasks, moodEnergy, mode]);
 
   const handleAIAction = (action, insight) => {
     // Handle AI action (accept/edit/ignore)
@@ -201,6 +203,22 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
     }
   };
 
+  const prompts = getPrompts(mode, 'daily');
+  const isTeamMode = teamState.mode === 'team';
+  
+  // Shared badge for team mode
+  const SharedBadge = isTeamMode ? (
+    <Badge variant="gray" size="sm" style={{ 
+      background: 'rgba(255, 255, 255, 0.2)',
+      color: 'rgba(255, 255, 255, 0.9)',
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+      fontSize: '10px',
+      padding: '2px 6px'
+    }}>
+      Shared
+    </Badge>
+  ) : null;
+
   return (
     <div className="space-y-6">
       {/* Selah Insight Card - Collapsible */}
@@ -212,23 +230,24 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
             onAction={handleAIAction}
             collapsible={true}
             title="selah"
+            plannerMode={mode}
           />
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Schedule */}
-      <WidgetCard title="Schedule" accent="blue">
+      {/* Schedule - Shared in team mode */}
+      <WidgetCard title={prompts.schedule?.title || "Schedule"} accent="blue" badge={SharedBadge}>
         <div className="space-y-2">
           <button
             onClick={addTimeBlock}
             className="button-windows text-xs px-2 py-1 w-full mb-2"
           >
-            + Add Time Block
+            {prompts.schedule?.addButton || "+ Add Time Block"}
           </button>
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {schedule.length === 0 ? (
-              <p className="text-gray-500 text-sm py-2 text-center">No time blocks yet</p>
+              <p className="text-gray-500 text-sm py-2 text-center">{prompts.schedule?.emptyState || "No time blocks yet"}</p>
             ) : (
               schedule.map((block) => (
                 <div key={block.id} className="flex gap-2 items-center p-2 bg-white/50 border border-gray-200">
@@ -249,7 +268,7 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
                     type="text"
                     value={block.label}
                     onChange={(e) => updateTimeBlock(block.id, 'label', e.target.value)}
-                    placeholder="Activity..."
+                    placeholder={prompts.schedule?.placeholder || "Activity..."}
                     className="flex-1 px-2 py-1 border border-gray-300 bg-white focus:outline-none focus:border-windows-blue text-sm"
                   />
                   <button
@@ -265,8 +284,8 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
         </div>
       </WidgetCard>
 
-      {/* Top 3 Today */}
-      <WidgetCard title="Top 3 Today" accent="green">
+      {/* Top 3 Today - Shared in team mode */}
+      <WidgetCard title={prompts.top3?.title || "Top 3 Today"} accent="green" badge={SharedBadge}>
         <div className="space-y-2">
           <Microcopy message="Tend what matters." className="mb-1" />
           {top3Today.map((item, index) => (
@@ -278,7 +297,7 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
                 type="text"
                 value={item.text}
                 onChange={(e) => updateTop3(index, e.target.value)}
-                placeholder={`Priority ${index + 1}...`}
+                placeholder={typeof prompts.top3?.placeholder === 'function' ? prompts.top3.placeholder(index) : `Priority ${index + 1}...`}
                 className="flex-1 px-2 py-1 border border-gray-300 bg-white focus:outline-none focus:border-windows-green text-sm"
               />
             </div>
@@ -315,7 +334,7 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
                       type="text"
                       value={task.text}
                       onChange={(e) => updateTask(task.id, 'text', e.target.value)}
-                      placeholder="Task description..."
+                      placeholder={prompts.tasks?.placeholder || "Task description..."}
                       className={`w-full px-2 py-1 border border-gray-300 bg-white focus:outline-none focus:border-windows-orange text-sm ${
                         task.completed ? 'line-through text-gray-500' : ''
                       }`}
@@ -324,7 +343,7 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
                       type="time"
                       value={task.dueTime}
                       onChange={(e) => updateTask(task.id, 'dueTime', e.target.value)}
-                      placeholder="Due time (optional)"
+                      placeholder={prompts.tasks?.dueTimePlaceholder || "Due time (optional)"}
                       className="w-full px-2 py-1 border border-gray-300 bg-white focus:outline-none focus:border-windows-orange text-xs"
                     />
                   </div>
@@ -352,12 +371,12 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
       )}
 
       {/* Notes */}
-      <WidgetCard title="Notes" accent="blue">
+      <WidgetCard title={prompts.notes?.title || "Notes"} accent="blue">
         <div>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Daily notes, thoughts, reminders..."
+            placeholder={prompts.notes?.placeholder || "Daily notes, thoughts, reminders..."}
             rows="8"
             className="w-full px-3 py-2 border-2 border-windows-border bg-white focus:outline-none focus:border-windows-blue text-sm resize-none"
           />
@@ -369,7 +388,7 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="text-xs font-medium text-gray-600 block mb-3">
-              Mood
+              {prompts.moodEnergy?.moodLabel || "How do I feel today?"}
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -388,7 +407,7 @@ const Daily = forwardRef(function Daily({ username, onSavingChange, onNavigateTo
           </div>
           <div>
             <label className="text-xs font-medium text-gray-600 block mb-3">
-              Energy
+              {prompts.moodEnergy?.energyLabel || "Energy level"}
             </label>
             <div className="flex items-center gap-2">
               <input

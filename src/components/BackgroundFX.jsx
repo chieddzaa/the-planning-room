@@ -9,7 +9,7 @@ import { getFXConfig } from '../utils/fxConfig';
  * @param {"yearly" | "monthly" | "weekly" | "daily"} props.page - Current page
  * @param {boolean} props.isLoginPage - Whether this is the login page (reduced effects)
  */
-export default function BackgroundFX({ theme = 'ai-lab', dayNightMode = 'day', page = 'weekly', isLoginPage = false }) {
+export default function BackgroundFX({ theme = 'ai-lab', dayNightMode = 'day', page = 'weekly', isLoginPage = false, plannerMode = 'personal' }) {
   // Use single computed themeKey - use theme as-is (same as rest of app, no duplicate mapping)
   const themeKey = theme; // Use theme key directly (same as rest of app)
   
@@ -267,8 +267,8 @@ export default function BackgroundFX({ theme = 'ai-lab', dayNightMode = 'day', p
     return elements;
   }, [config, random, randomInt]);
 
-  // Hearts should ONLY show in Day Mode Pink + Day Mode Rose Quartz
-  const shouldShowHearts = dayNightMode === 'day' && (themeKey === 'pink' || themeKey === 'rose-quartz');
+  // Hearts should ONLY show in Personal Mode + Day Mode Pink + Day Mode Rose Quartz
+  const shouldShowHearts = plannerMode === 'personal' && dayNightMode === 'day' && (themeKey === 'pink' || themeKey === 'rose-quartz');
 
   return (
     <div 

@@ -18,16 +18,22 @@ import { useUser } from './hooks/useUser';
 import { useThemeTint } from './hooks/useThemeTint';
 import { useTheme } from './hooks/useTheme';
 import { useDayNightMode } from './hooks/useDayNightMode';
+import { usePlannerMode } from './hooks/usePlannerMode';
+import { useTeamState } from './hooks/useTeamState';
+import CollaborateModal from './components/CollaborateModal';
 
 function App() {
   const { username, setUsername, logout } = useUser();
   const { themeTint, setThemeTint } = useThemeTint(username);
   const { theme, setTheme } = useTheme(username);
   const { mode: dayNightMode, toggleMode: toggleDayNightMode } = useDayNightMode(username);
+  const { mode: plannerMode, setMode: setPlannerMode } = usePlannerMode();
+  const { teamState, createTeam, joinTeam, leaveTeam } = useTeamState();
   const [activeTab, setActiveTab] = useState('yearly');
   const [isSaving, setIsSaving] = useState(false);
   const [displayTab, setDisplayTab] = useState('yearly');
   const [showDoneModal, setShowDoneModal] = useState(false);
+  const [showCollaborateModal, setShowCollaborateModal] = useState(false);
   // TODO: Re-add Selah chat later
   // const [selahOpen, setSelahOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,7 +45,7 @@ function App() {
   const dailyRef = useRef(null);
   const doneButtonRef = useRef(null);
 
-  // Apply theme and day/night mode to body on mount and when they change
+  // Apply theme, day/night mode, and planner mode to body on mount and when they change
   useEffect(() => {
     if (username && theme) {
       document.body.setAttribute('data-theme', theme);
@@ -53,7 +59,40 @@ function App() {
     } else {
       document.body.setAttribute('data-day-night', 'day');
     }
-  }, [theme, username, dayNightMode]);
+
+    // Apply planner mode
+    document.body.setAttribute('data-planner-mode', plannerMode);
+  }, [theme, username, dayNightMode, plannerMode]);
+
+  // Handle URL parameters for team joining
+  useEffect(() => {
+    if (plannerMode === 'work') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const teamId = urlParams.get('team');
+      
+      if (teamId && teamState.mode !== 'team') {
+        // Auto-join team from URL
+        joinTeam(teamId);
+        
+        // Clean URL (remove query param)
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, [plannerMode, teamState.mode, joinTeam]);
+
+  // Team management handlers
+  const handleCreateTeam = (teamName) => {
+    createTeam(teamName);
+  };
+
+  const handleJoinTeam = (teamId, teamName) => {
+    joinTeam(teamId, teamName);
+  };
+
+  const handleLeaveTeam = () => {
+    leaveTeam();
+  };
 
   // Handle tab change with smooth transition
   const handleTabChange = useCallback((newTab) => {
@@ -183,15 +222,15 @@ function App() {
   const renderContent = () => {
     switch (displayTab) {
       case 'yearly':
-        return <Yearly ref={yearlyRef} username={username} onSavingChange={handleSavingChange} />;
+        return <Yearly ref={yearlyRef} username={username} onSavingChange={handleSavingChange} mode={plannerMode} />;
       case 'monthly':
-        return <Monthly ref={monthlyRef} username={username} onSavingChange={handleSavingChange} />;
+        return <Monthly ref={monthlyRef} username={username} onSavingChange={handleSavingChange} mode={plannerMode} />;
       case 'weekly':
-        return <Weekly ref={weeklyRef} username={username} onSavingChange={handleSavingChange} />;
+        return <Weekly ref={weeklyRef} username={username} onSavingChange={handleSavingChange} mode={plannerMode} />;
       case 'daily':
-        return <Daily ref={dailyRef} username={username} onSavingChange={handleSavingChange} onNavigateToWeekly={() => handleTabChange('weekly')} />;
+        return <Daily ref={dailyRef} username={username} onSavingChange={handleSavingChange} onNavigateToWeekly={() => handleTabChange('weekly')} mode={plannerMode} teamState={teamState} />;
       default:
-        return <Yearly ref={yearlyRef} username={username} onSavingChange={handleSavingChange} />;
+        return <Yearly ref={yearlyRef} username={username} onSavingChange={handleSavingChange} mode={plannerMode} />;
     }
   };
 
@@ -264,7 +303,10 @@ function App() {
           activeTab={activeTab}
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           onDone={handleDone}
+          plannerMode={plannerMode}
+          onPlannerModeChange={setPlannerMode}
           onDoneButtonRef={handleDoneButtonRef}
+          onCollaborateClick={() => setShowCollaborateModal(true)}
         />
         <div className="flex flex-1 overflow-hidden">
           {/* Desktop Sidebar */}
@@ -298,7 +340,7 @@ function App() {
           
           <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 relative pb-20 md:pb-6">
             {/* Theme-based Background FX - Full effects after login */}
-            <BackgroundFX theme={theme} dayNightMode={dayNightMode} page={displayTab} isLoginPage={false} />
+            <BackgroundFX theme={theme} dayNightMode={dayNightMode} page={displayTab} isLoginPage={false} plannerMode={plannerMode} />
             
             {/* Content with smooth page transition */}
             <div 
@@ -386,6 +428,16 @@ function App() {
           onWeeklyReset={handleWeeklyReset}
           onViewProgress={handleViewProgress}
           onReturnFocus={handleCloseDoneModal}
+        />
+
+        {/* Collaborate Modal */}
+        <CollaborateModal
+          isOpen={showCollaborateModal}
+          onClose={() => setShowCollaborateModal(false)}
+          teamState={teamState}
+          onCreateTeam={handleCreateTeam}
+          onJoinTeam={handleJoinTeam}
+          onLeaveTeam={handleLeaveTeam}
         />
         
         {/* PWA Install Prompt */}

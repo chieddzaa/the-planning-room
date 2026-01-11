@@ -16,6 +16,7 @@ export default function WidgetCard({
   children,
   actions,
   className = '',
+  badge,
 }) {
   // Legacy accent support for backwards compatibility, but now uses CSS variables
   const accentGradients = {

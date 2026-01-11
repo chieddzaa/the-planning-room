@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getProfilePicture, removeProfilePicture, saveProfilePicture, imageToDataURL, validateImageFile, compressImage } from '../utils/profilePicture';
 import { getEnabledThemes, getThemeConfig } from '../utils/themeConfig';
 
-export default function TitleBar({ username, themeTint, onThemeChange, theme, onThemeSwitch, dayNightMode = 'day', onToggleDayNight, onLogout, activeTab, onMenuClick, onDone, onDoneButtonRef }) {
+export default function TitleBar({ username, themeTint, onThemeChange, theme, onThemeSwitch, dayNightMode = 'day', onToggleDayNight, onLogout, activeTab, onMenuClick, onDone, onDoneButtonRef, plannerMode = 'personal', onPlannerModeChange, onCollaborateClick }) {
   const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [showThemeSwitchMenu, setShowThemeSwitchMenu] = useState(false);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
@@ -37,6 +37,7 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
   };
 
   const initials = getInitials(username);
+
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -388,6 +389,92 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
             </>
           )}
         </div>
+
+        {/* Planner Mode Toggle - Personal / Work */}
+        {onPlannerModeChange && (
+          <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg border border-white/30 backdrop-blur-sm">
+            <button
+              onClick={() => onPlannerModeChange('personal')}
+              className={`px-2 py-0.5 text-xs font-medium rounded transition-all ${
+                plannerMode === 'personal'
+                  ? 'text-white bg-white/20'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              Personal
+            </button>
+            <span className="text-white/40 text-xs">/</span>
+            <button
+              onClick={() => onPlannerModeChange('work')}
+              className={`px-2 py-0.5 text-xs font-medium rounded transition-all ${
+                plannerMode === 'work'
+                  ? 'text-white bg-white/20'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              Work
+            </button>
+          </div>
+        )}
+
+        {/* Collaborate Button - Work Mode Only */}
+        {plannerMode === 'work' && (
+          <button
+            onClick={() => {
+              if (onCollaborateClick) {
+                onCollaborateClick();
+              }
+            }}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all duration-200 relative z-10 touch-manipulation"
+            style={{
+              minWidth: '44px',
+              minHeight: '44px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: 'var(--rc-radius, 8px)',
+              color: 'rgba(255, 255, 255, 0.95)',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.15), 0 0 8px rgba(255, 255, 255, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+              e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.08)';
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.outline = '2px solid rgba(255, 255, 255, 0.6)';
+              e.currentTarget.style.outlineOffset = '2px';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.15), 0 0 8px rgba(255, 255, 255, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.outline = 'none';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.08)';
+            }}
+          >
+            {/* Users/Team Icon */}
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ flexShrink: 0 }}
+            >
+              <path
+                d="M5.5 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM10.5 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM3 11.5c0-1.5 1-2.5 2.5-2.5h5c1.5 0 2.5 1 2.5 2.5V13H3v-1.5Z"
+                fill="currentColor"
+                fillOpacity="0.9"
+              />
+            </svg>
+            <span>Collaborate</span>
+          </button>
+        )}
 
         {/* Done Button - Desktop */}
         {onDone && (

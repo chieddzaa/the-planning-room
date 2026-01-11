@@ -1685,3 +1685,113 @@
   }
 
 }
+
+/* Work Mode Overrides - Black and White Styling */
+[data-planner-mode="work"] {
+  /* Background - mostly white/off-white */
+  --bg1: #ffffff;
+  --bg2: #fafafa;
+  
+  /* Cards - clean white with soft shadow */
+  --card: #ffffff;
+  --card-hover: #ffffff;
+  --border: rgba(0, 0, 0, 0.1); /* Black border - thin, professional */
+  
+  /* Text colors - black/gray professional */
+  --text: #000000; /* Black */
+  --muted: #666666; /* Dark gray */
+  
+  /* Primary accents - black */
+  --primary-color: #000000; /* Black */
+  --primary-color-2: #1a1a1a; /* Near black */
+  --accent: #000000;
+  --accent2: #1a1a1a;
+  
+  /* Secondary accents - gray */
+  --secondary-accent: #333333; /* Dark gray */
+  --secondary-accent-2: #666666; /* Medium gray */
+  
+  /* Very subtle glow - minimal, black-based */
+  --glow-color: rgba(0, 0, 0, 0.08);
+  --hover-glow: rgba(0, 0, 0, 0.12);
+  
+  /* Glass effect - minimal */
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-blur: blur(8px) saturate(100%);
+  
+  /* Reality Check tokens - Black and White */
+  --rc-primary: #000000;
+  --rc-primary-2: #1a1a1a;
+  --rc-accent: #000000; /* Black */
+  --rc-accent-2: #1a1a1a;
+  --rc-accent-rgb: 0, 0, 0;
+  --rc-accent-2-rgb: 26, 26, 26;
+  --rc-glow: rgba(0, 0, 0, 0.08);
+  
+  /* Background tokens */
+  --rc-bg: #ffffff;
+  
+  /* Card tokens */
+  --rc-card: #ffffff;
+  --rc-glass: rgba(255, 255, 255, 0.95);
+  
+  /* Text tokens */
+  --rc-text: #000000;
+  --rc-muted: #666666;
+  
+  /* Border tokens */
+  --rc-border: rgba(0, 0, 0, 0.1);
+  
+  /* Border radius - slightly rounded, professional (not bubbly) */
+  --border-radius: 8px;
+  --border-radius-sm: 6px;
+  --border-radius-lg: 10px;
+  --rc-radius: 8px;
+  
+  /* Soft shadow for cards */
+  --rc-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Work Mode - Cards: Clean white with soft shadow and thin border */
+[data-planner-mode="work"] .widget-card-container {
+  background: var(--rc-card, #ffffff);
+  border: 1px solid var(--rc-border, rgba(0, 0, 0, 0.1));
+  box-shadow: var(--rc-shadow, 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04));
+}
+
+[data-planner-mode="work"] .glass-card {
+  background: var(--rc-card, #ffffff) !important;
+  border: 1px solid var(--rc-border, rgba(0, 0, 0, 0.1));
+}
+
+/* Work Mode - Buttons: Minimal, professional, slightly rounded */
+[data-planner-mode="work"] button {
+  border-radius: var(--rc-radius, 8px);
+}
+
+[data-planner-mode="work"] .button-primary {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+[data-planner-mode="work"] .button-primary:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* Work Mode - Reduce decorative animations and effects */
+[data-planner-mode="work"] .background-fx {
+  opacity: 0.1; /* Very minimal background animations */
+}
+
+[data-planner-mode="work"] .fx-heart {
+  display: none !important; /* Explicitly hide hearts */
+}
+
+/* Work Mode - Ensure body uses work mode background */
+[data-planner-mode="work"] body {
+  background-color: var(--rc-bg, #fefefe);
+}
+
+/* Work Mode - Apply background to main container */
+[data-planner-mode="work"] .window-border {
+  background-color: var(--rc-bg, #fefefe);
+}
