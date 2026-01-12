@@ -418,14 +418,14 @@ export default function TitleBar({ username, themeTint, onThemeChange, theme, on
         )}
 
         {/* Collaborate Button - Work Mode Only */}
-        {plannerMode === 'work' && (
+        {plannerMode === 'work' && onCollaborateClick && (
           <button
             onClick={() => {
               if (onCollaborateClick) {
                 onCollaborateClick();
               }
             }}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all duration-200 relative z-10 touch-manipulation"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all duration-200 relative z-10 touch-manipulation"
             style={{
               minWidth: '44px',
               minHeight: '44px',
